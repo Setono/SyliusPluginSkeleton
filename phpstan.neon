@@ -1,5 +1,6 @@
 parameters:
     reportUnmatchedIgnoredErrors: true
+    checkMissingIterableValueType: false
 
     excludes_analyse:
         # Makes PHPStan crash
