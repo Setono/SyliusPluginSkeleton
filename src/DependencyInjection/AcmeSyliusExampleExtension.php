@@ -16,6 +16,8 @@ final class AcmeSyliusExampleExtension extends Extension
         $config = $this->processConfiguration($this->getConfiguration([], $container), $config);
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
 
+        $container->setParameter('acme_sylius_example.option', $config['option']);
+
         $loader->load('services.xml');
     }
 }

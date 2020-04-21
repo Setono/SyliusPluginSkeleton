@@ -39,6 +39,7 @@
         "symfony/debug-bundle": "^4.4 || ^5.0",
         "symfony/dotenv": "^4.4 || ^5.0",
         "symfony/intl": "^4.4 || ^5.0",
+        "symfony/maker-bundle": "^1.15",
         "symfony/web-profiler-bundle": "^4.4 || ^5.0",
         "symfony/web-server-bundle": "^4.4 || ^5.0",
         "thecodingmachine/phpstan-safe-rule": "^1.0"
