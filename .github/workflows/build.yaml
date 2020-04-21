@@ -38,7 +38,7 @@ jobs:
             -   name: Lint yaml files
                 run: (cd tests/Application && bin/console lint:yaml ../../src/Resources)
             -   name: Lint twig files
-                run: bin/console lint:twig ../../src/Resources
+                run: (cd tests/Application && bin/console lint:twig ../../src/Resources)
             -   name: Check style
                 run: composer check-style
             -   name: Static analysis
