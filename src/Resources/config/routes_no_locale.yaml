@@ -1,0 +1,10 @@
+# By default Sylius uses urls like https://example.com/en_US/, but Sylius also offers the option to disable
+# localized URLs (see https://docs.sylius.com/en/latest/cookbook/shop/disabling-localised-urls.html).
+# To accommodate this in your plugin, provide a routes file for non localized stores and tell this in the README.md
+
+acme_sylius_example_shop:
+    resource: "@AcmeSyliusExamplePlugin/Resources/config/routes/shop.yaml"
+
+acme_sylius_example_admin:
+    resource: "@AcmeSyliusExamplePlugin/Resources/config/routes/admin.yaml"
+    prefix: /admin

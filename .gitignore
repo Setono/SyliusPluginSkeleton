@@ -1,0 +1,15 @@
+/vendor/
+/node_modules/
+/composer.lock
+
+# Keep the build folder for behat builds
+/etc/build/*
+!/etc/build/.gitignore
+
+# Keep the features folder for behat features
+/features/*
+!/features/.gitignore
+
+/tests/Application/yarn.lock
+
+/.phpunit.result.cache
