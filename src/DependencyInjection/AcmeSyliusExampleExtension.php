@@ -11,9 +11,6 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
 final class AcmeSyliusExampleExtension extends Extension
 {
-    /**
-     * {@inheritdoc}
-     */
     public function load(array $config, ContainerBuilder $container): void
     {
         $config = $this->processConfiguration($this->getConfiguration([], $container), $config);
