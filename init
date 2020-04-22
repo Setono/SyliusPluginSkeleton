@@ -1,0 +1,56 @@
+#!/usr/bin/env php
+<?php
+require __DIR__.'/vendor/autoload.php';
+
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Helper\QuestionHelper;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\Question;
+use Symfony\Component\DependencyInjection\Container;
+
+(new Application('rename', '1.0.0'))
+    ->register('rename')
+    ->addArgument('foo', InputArgument::OPTIONAL, 'The directory')
+    ->addOption('bar', null, InputOption::VALUE_REQUIRED)
+    ->setCode(function(InputInterface $input, OutputInterface $output) {
+        $questionHelper = new QuestionHelper();
+
+        $vendor = $questionHelper->ask($input, $output, new Question('What is your plugin namespace (usually this is your organization name)? '));
+        $pluginName = $questionHelper->ask($input, $output, new Question('What is your plugin name (the convention is to wrap your name with Sylius and Plugin, i.e. "SyliusYourNamePlugin")? '));
+
+        $symfonyPath = '@' . $vendor . $pluginName;
+
+        $yamlNamespace = Container::underscore($vendor) . '_' . Container::underscore($pluginName);
+        if(substr($yamlNamespace, -7) === '_plugin') {
+            $yamlNamespace = substr($yamlNamespace, 0, -7);
+        }
+
+        replaceInFile('rector.yaml', [
+            'YourNamespace' => $vendor,
+            'NameOfPlugin' => $pluginName,
+        ]);
+        replaceInFile('src/Resources/config/routes.yaml', [
+            'acme_sylius_example' => $yamlNamespace,
+            '@AcmeSyliusExamplePlugin' => $symfonyPath,
+        ]);
+        replaceInFile('src/Resources/config/routes_no_locale.yaml', [
+            'acme_sylius_example' => $yamlNamespace,
+            '@AcmeSyliusExamplePlugin' => $symfonyPath,
+        ]);
+    })
+    ->getApplication()
+    ->setDefaultCommand('rename', true) // Single command application
+    ->run()
+;
+
+function replaceInFile(string $file, array $replacements): void
+{
+    $search = array_keys($replacements);
+    $replace = array_values($replacements);
+
+    $data = file_get_contents($file);
+    file_put_contents($file, str_replace($search, $replace, $data));
+}
