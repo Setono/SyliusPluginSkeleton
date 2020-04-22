@@ -1,0 +1,13 @@
+parameters:
+    paths:
+        - 'src'
+        - 'tests'
+    exclude_paths:
+        - '*/node_modules/*'
+        - '*/tests/Application/var/*'
+
+services:
+    Rector\Renaming\Rector\Namespace_\RenameNamespaceRector:
+        $oldToNewNamespaces:
+            Acme\SyliusExamplePlugin: YourNamespace\NameOfPlugin
+    Rector\PostRector\Rector\NameImportingPostRector: ~
