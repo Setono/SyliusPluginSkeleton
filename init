@@ -19,7 +19,19 @@ use Symfony\Component\DependencyInjection\Container;
         $questionHelper = new QuestionHelper();
 
         $vendor = $questionHelper->ask($input, $output, new Question('What is your plugin namespace (usually this is your organization name)? '));
-        $pluginName = $questionHelper->ask($input, $output, new Question('What is your plugin name (the convention is to wrap your name with Sylius and Plugin, i.e. "SyliusYourNamePlugin")? '));
+
+        $q = new Question('What is your plugin name ("Plugin" will be appended to the plugin name)? ');
+        $q->setValidator(static function ($answer) {
+            if (!is_string($answer) || 'Plugin' === substr($answer, -6)) {
+                throw new \RuntimeException(
+                    'The name of the plugin should not include "Plugin". That will be appended automatically'
+                );
+            }
+
+            return $answer;
+        });
+        $pluginName = $questionHelper->ask($input, $output, $q);
+        $pluginNameWithSuffix = $pluginName . 'Plugin';
 
         $symfonyPath = '@' . $vendor . $pluginName;
 
@@ -29,8 +41,9 @@ use Symfony\Component\DependencyInjection\Container;
         }
 
         replaceInFile('rector.yaml', [
-            'YourNamespace' => $vendor,
-            'NameOfPlugin' => $pluginName,
+            '${vendor}' => $vendor,
+            '${pluginName}' => $pluginName,
+            '${pluginNameWithSuffix}' => $pluginNameWithSuffix,
         ]);
         replaceInFile('src/Resources/config/routes.yaml', [
             'acme_sylius_example' => $yamlNamespace,
@@ -39,6 +52,10 @@ use Symfony\Component\DependencyInjection\Container;
         replaceInFile('src/Resources/config/routes_no_locale.yaml', [
             'acme_sylius_example' => $yamlNamespace,
             '@AcmeSyliusExamplePlugin' => $symfonyPath,
+        ]);
+        replaceInFile('composer.json', [
+            'setono/sylius-plugin-skeleton' => str_replace('_', '-', Container::underscore($vendor)) . '/' . str_replace('_', '-', Container::underscore($pluginName)),
+            'Acme\\\\SyliusExamplePlugin' => $vendor . '\\\\' . $pluginName,
         ]);
     })
     ->getApplication()
