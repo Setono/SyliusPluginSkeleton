@@ -35,25 +35,45 @@ use Symfony\Component\Finder\Finder;
         $pluginName = $questionHelper->ask($input, $output, $q);
         $pluginNameWithSuffix = $pluginName . 'Plugin';
 
-        $symfonyPath = '@' . $vendor . $pluginName;
+        $symfonyPath = '@' . $vendor . $pluginNameWithSuffix;
 
         $yamlNamespace = Container::underscore($vendor) . '_' . Container::underscore($pluginName);
         if(substr($yamlNamespace, -7) === '_plugin') {
             $yamlNamespace = substr($yamlNamespace, 0, -7);
         }
 
-        $finder->in(['src', 'tests'])->name('*.yaml')->contains(['acme_sylius_example', '@AcmeSyliusExamplePlugin']);
+        $finder
+            ->in(['src', 'tests'])
+            ->name('*.yaml')
+            ->name('*.php')
+            ->contains('acme_sylius_example')
+            ->contains('@AcmeSyliusExamplePlugin')
+            ->contains('Acme\\SyliusExamplePlugin')
+            ->contains('AcmeSyliusExample')
+        ;
+
         foreach ($finder as $file) {
             replaceInFile($file->getPathname(), [
                 'acme_sylius_example' => $yamlNamespace,
                 '@AcmeSyliusExamplePlugin' => $symfonyPath,
+                'Acme\\SyliusExamplePlugin' => $vendor . '\\' . $pluginNameWithSuffix,
+                'AcmeSyliusExample' => $vendor.$pluginName,
             ]);
         }
 
+
         replaceInFile('composer.json', [
             'setono/sylius-plugin-skeleton' => str_replace('_', '-', Container::underscore($vendor)) . '/' . str_replace('_', '-', Container::underscore($pluginNameWithSuffix)),
-            'Acme\\\\SyliusExamplePlugin' => $vendor . '\\\\' . $pluginName,
+            'Acme\\\\SyliusExamplePlugin' => $vendor . '\\\\' . $pluginNameWithSuffix,
         ]);
+
+        replaceInFile('phpspec.yml.dist', ['Acme\\SyliusExamplePlugin' => $vendor . '\\' . $pluginNameWithSuffix]);
+        replaceInFile('phpunit.xml.dist', ['AcmeSyliusExamplePlugin' => $vendor.$pluginNameWithSuffix]);
+        replaceInFile('LICENSE', ['Acme' => $vendor]);
+
+        rename('src/DependencyInjection/AcmeSyliusExampleExtension.php', sprintf('src/DependencyInjection/%s%sExtension.php', $vendor, $pluginName));
+        rename('src/AcmeSyliusExamplePlugin.php', sprintf('src/%s%s.php', $vendor, $pluginNameWithSuffix));
+        rename('tests/DependencyInjection/AcmeSyliusExampleExtensionTest.php', sprintf('tests/DependencyInjection/%s%sExtensionTest.php', $vendor, $pluginName));
     })
     ->getApplication()
     ->setDefaultCommand('rename', true) // Single command application
