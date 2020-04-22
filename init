@@ -4,18 +4,14 @@ require __DIR__.'/vendor/autoload.php';
 
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Helper\QuestionHelper;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Finder\Finder;
 
-(new Application('rename', '1.0.0'))
-    ->register('rename')
-    ->addArgument('foo', InputArgument::OPTIONAL, 'The directory')
-    ->addOption('bar', null, InputOption::VALUE_REQUIRED)
+(new Application('init', '1.0.0'))
+    ->register('init')
     ->setCode(function(InputInterface $input, OutputInterface $output) {
         $questionHelper = new QuestionHelper();
         $finder = new Finder();
@@ -76,7 +72,7 @@ use Symfony\Component\Finder\Finder;
         rename('tests/DependencyInjection/AcmeSyliusExampleExtensionTest.php', sprintf('tests/DependencyInjection/%s%sExtensionTest.php', $vendor, $pluginName));
     })
     ->getApplication()
-    ->setDefaultCommand('rename', true) // Single command application
+    ->setDefaultCommand('init', true) // Single command application
     ->run()
 ;
 
