@@ -40,6 +40,8 @@ use Symfony\Component\DependencyInjection\Container;
             $yamlNamespace = substr($yamlNamespace, 0, -7);
         }
 
+        copy('rector.yaml.dist', 'rector.yaml');
+
         replaceInFile('rector.yaml', [
             '${vendor}' => $vendor,
             '${pluginName}' => $pluginName,
