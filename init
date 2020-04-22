@@ -10,6 +10,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\Finder\Finder;
 
 (new Application('rename', '1.0.0'))
     ->register('rename')
@@ -17,6 +18,7 @@ use Symfony\Component\DependencyInjection\Container;
     ->addOption('bar', null, InputOption::VALUE_REQUIRED)
     ->setCode(function(InputInterface $input, OutputInterface $output) {
         $questionHelper = new QuestionHelper();
+        $finder = new Finder();
 
         $vendor = $questionHelper->ask($input, $output, new Question('What is your plugin namespace (usually this is your organization name)? '));
 
@@ -40,23 +42,16 @@ use Symfony\Component\DependencyInjection\Container;
             $yamlNamespace = substr($yamlNamespace, 0, -7);
         }
 
-        copy('rector.yaml.dist', 'rector.yaml');
+        $finder->in(['src', 'tests'])->name('*.yaml')->contains(['acme_sylius_example', '@AcmeSyliusExamplePlugin']);
+        foreach ($finder as $file) {
+            replaceInFile($file->getPathname(), [
+                'acme_sylius_example' => $yamlNamespace,
+                '@AcmeSyliusExamplePlugin' => $symfonyPath,
+            ]);
+        }
 
-        replaceInFile('rector.yaml', [
-            '${vendor}' => $vendor,
-            '${pluginName}' => $pluginName,
-            '${pluginNameWithSuffix}' => $pluginNameWithSuffix,
-        ]);
-        replaceInFile('src/Resources/config/routes.yaml', [
-            'acme_sylius_example' => $yamlNamespace,
-            '@AcmeSyliusExamplePlugin' => $symfonyPath,
-        ]);
-        replaceInFile('src/Resources/config/routes_no_locale.yaml', [
-            'acme_sylius_example' => $yamlNamespace,
-            '@AcmeSyliusExamplePlugin' => $symfonyPath,
-        ]);
         replaceInFile('composer.json', [
-            'setono/sylius-plugin-skeleton' => str_replace('_', '-', Container::underscore($vendor)) . '/' . str_replace('_', '-', Container::underscore($pluginName)),
+            'setono/sylius-plugin-skeleton' => str_replace('_', '-', Container::underscore($vendor)) . '/' . str_replace('_', '-', Container::underscore($pluginNameWithSuffix)),
             'Acme\\\\SyliusExamplePlugin' => $vendor . '\\\\' . $pluginName,
         ]);
     })
