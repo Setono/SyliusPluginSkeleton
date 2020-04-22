@@ -19,7 +19,7 @@ Enjoy!
 2. From the plugin skeleton root directory, run the following commands:
 
     ```bash
-    $ bin/init
+    $ php init
     $ (cd tests/Application && yarn install)
     $ (cd tests/Application && yarn build)
     $ (cd tests/Application && bin/console assets:install)
