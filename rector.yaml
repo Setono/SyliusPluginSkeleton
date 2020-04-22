@@ -10,4 +10,5 @@ services:
     Rector\Renaming\Rector\Namespace_\RenameNamespaceRector:
         $oldToNewNamespaces:
             Acme\SyliusExamplePlugin: YourNamespace\NameOfPlugin
+            Tests\Acme\SyliusExamplePlugin: Tests\YourNamespace\NameOfPlugin
     Rector\PostRector\Rector\NameImportingPostRector: ~
