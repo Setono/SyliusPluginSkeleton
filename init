@@ -9,6 +9,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Process\Process;
 
 (new Application('init', '1.0.0'))
     ->register('init')
@@ -31,45 +32,49 @@ use Symfony\Component\Finder\Finder;
         $pluginName = $questionHelper->ask($input, $output, $q);
         $pluginNameWithSuffix = $pluginName . 'Plugin';
 
-        $symfonyPath = '@' . $vendor . $pluginNameWithSuffix;
-
         $yamlNamespace = Container::underscore($vendor) . '_' . Container::underscore($pluginName);
-        if(substr($yamlNamespace, -7) === '_plugin') {
-            $yamlNamespace = substr($yamlNamespace, 0, -7);
-        }
+
+        $composerName = str_replace('_', '-', Container::underscore($vendor)) . '/' . str_replace('_', '-', Container::underscore($pluginNameWithSuffix));
 
         $finder
-            ->in(['src', 'tests'])
-            ->name('*.yaml')
-            ->name('*.php')
-            ->contains('acme_sylius_example')
-            ->contains('@AcmeSyliusExamplePlugin')
-            ->contains('Acme\\SyliusExamplePlugin')
-            ->contains('AcmeSyliusExample')
+            ->in('.')
+            ->exclude(['vendor', 'node_modules', '.github', '.idea'])
+            ->ignoreVCSIgnored(true)
+            ->ignoreVCS(true)
+            ->contains('/acme/i')
+            ->ignoreDotFiles(false)
+            ->notName('init') // this file
         ;
 
         foreach ($finder as $file) {
             replaceInFile($file->getPathname(), [
                 'acme_sylius_example' => $yamlNamespace,
-                '@AcmeSyliusExamplePlugin' => $symfonyPath,
                 'Acme\\SyliusExamplePlugin' => $vendor . '\\' . $pluginNameWithSuffix,
+                'AcmeSyliusExamplePlugin' => $vendor.$pluginNameWithSuffix,
                 'AcmeSyliusExample' => $vendor.$pluginName,
+                'Acme' => $vendor,
             ]);
         }
 
 
         replaceInFile('composer.json', [
-            'setono/sylius-plugin-skeleton' => str_replace('_', '-', Container::underscore($vendor)) . '/' . str_replace('_', '-', Container::underscore($pluginNameWithSuffix)),
+            'setono/sylius-plugin-skeleton' => $composerName,
             'Acme\\\\SyliusExamplePlugin' => $vendor . '\\\\' . $pluginNameWithSuffix,
         ]);
 
-        replaceInFile('phpspec.yml.dist', ['Acme\\SyliusExamplePlugin' => $vendor . '\\' . $pluginNameWithSuffix]);
-        replaceInFile('phpunit.xml.dist', ['AcmeSyliusExamplePlugin' => $vendor.$pluginNameWithSuffix]);
-        replaceInFile('LICENSE', ['Acme' => $vendor]);
+        replaceInFile('README.md', [
+            'Setono Sylius Plugin Skeleton' => $vendor . ' ' . $pluginNameWithSuffix,
+            'Setono/SyliusPluginSkeleton' => $vendor . '/' . $pluginNameWithSuffix,
+            'setono/sylius-plugin-skeleton' => $composerName,
+        ]);
 
         rename('src/DependencyInjection/AcmeSyliusExampleExtension.php', sprintf('src/DependencyInjection/%s%sExtension.php', $vendor, $pluginName));
         rename('src/AcmeSyliusExamplePlugin.php', sprintf('src/%s%s.php', $vendor, $pluginNameWithSuffix));
         rename('tests/DependencyInjection/AcmeSyliusExampleExtensionTest.php', sprintf('tests/DependencyInjection/%s%sExtensionTest.php', $vendor, $pluginName));
+        rename('tests/Application/config/packages/acme_sylius_example.yaml', sprintf('tests/Application/config/packages/%s.yaml', $yamlNamespace));
+
+        $process = new Process(['composer', 'dump-autoload']);
+        $process->run();
     })
     ->getApplication()
     ->setDefaultCommand('init', true) // Single command application
