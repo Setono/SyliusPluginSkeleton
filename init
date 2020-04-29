@@ -9,6 +9,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Process\Process;
 
 (new Application('init', '1.0.0'))
     ->register('init')
@@ -71,6 +72,9 @@ use Symfony\Component\Finder\Finder;
         rename('src/AcmeSyliusExamplePlugin.php', sprintf('src/%s%s.php', $vendor, $pluginNameWithSuffix));
         rename('tests/DependencyInjection/AcmeSyliusExampleExtensionTest.php', sprintf('tests/DependencyInjection/%s%sExtensionTest.php', $vendor, $pluginName));
         rename('tests/Application/config/packages/acme_sylius_example.yaml', sprintf('tests/Application/config/packages/%s.yaml', $yamlNamespace));
+
+        $process = new Process(['composer', 'dump-autoload']);
+        $process->run();
     })
     ->getApplication()
     ->setDefaultCommand('init', true) // Single command application
