@@ -14,7 +14,7 @@ Enjoy!
 
 ## Quickstart
 
-1. Run `composer create-project setono/sylius-plugin-skeleton ProjectName`.
+1. Run `composer create-project setono/sylius-plugin-skeleton:dev-master ProjectName`.
 
 2. From the plugin skeleton root directory, run the following commands:
 
