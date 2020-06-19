@@ -12,28 +12,19 @@
         "sylius/sylius": "^1.7"
     },
     "require-dev": {
-        "ergebnis/composer-normalize": "^2.3",
-        "korbeil/phpstan-generic-rules": "^0.2.4",
         "lakion/mink-debug-extension": "^1.2.3",
         "matthiasnoback/symfony-config-test": "^4.1",
         "matthiasnoback/symfony-dependency-injection-test": "^4.1",
         "phpspec/phpspec": "^6.1",
-        "phpstan/extension-installer": "^1.0",
-        "phpstan/phpstan": "^0.12.19",
-        "phpstan/phpstan-doctrine": "^0.12.10",
-        "phpstan/phpstan-strict-rules": "^0.12.2",
-        "phpstan/phpstan-webmozart-assert": "^0.12.3",
         "phpunit/phpunit": "^8.5",
         "roave/security-advisories": "dev-master",
-        "sylius-labs/coding-standard": "^3.1",
+        "setono/code-quality-pack": "^1.0",
         "symfony/browser-kit": "^4.4 || ^5.0",
         "symfony/debug-bundle": "^4.4 || ^5.0",
         "symfony/dotenv": "^4.4 || ^5.0",
         "symfony/intl": "^4.4 || ^5.0",
         "symfony/maker-bundle": "^1.15",
-        "symfony/web-profiler-bundle": "^4.4 || ^5.0",
-        "symfony/web-server-bundle": "^4.4 || ^5.0",
-        "thecodingmachine/phpstan-safe-rule": "^1.0"
+        "symfony/web-profiler-bundle": "^4.4 || ^5.0"
     },
     "config": {
         "sort-packages": true
