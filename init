@@ -64,7 +64,7 @@ use Symfony\Component\Process\Process;
 
         replaceInFile('composer.json', [
             'setono/sylius-plugin-skeleton' => $composerName,
-            'SyliusExamplePlugin' => $vendor . '\\\\' . $pluginNameWithSuffix,
+            'SyliusExamplePlugin' => $pluginNameWithSuffix,
         ]);
 
         replaceInFile('README.md', [
