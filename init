@@ -19,17 +19,22 @@ use Symfony\Component\Process\Process;
 
         $vendor = $questionHelper->ask($input, $output, new Question('What is your plugin namespace (usually this is your organization name)? '));
 
-        $q = new Question('What is your plugin name ("Plugin" will be appended to the plugin name)? ');
+        $q = new Question('What is your plugin name? ');
         $q->setValidator(static function ($answer) {
-            if (!is_string($answer) || 'Plugin' === substr($answer, -6)) {
+            if (!is_string($answer)) {
                 throw new \RuntimeException(
-                    'The name of the plugin should not include "Plugin". That will be appended automatically'
+                    'Please enter the plugin name.'
                 );
             }
 
             return $answer;
         });
         $pluginName = $questionHelper->ask($input, $output, $q);
+
+        if ('Plugin' === substr($pluginName, -6)) {
+            $pluginName = substr($pluginName, 0, -6);
+        }
+
         $pluginNameWithSuffix = $pluginName . 'Plugin';
 
         $yamlNamespace = Container::underscore($vendor) . '_' . Container::underscore($pluginName);
@@ -59,7 +64,7 @@ use Symfony\Component\Process\Process;
 
         replaceInFile('composer.json', [
             'setono/sylius-plugin-skeleton' => $composerName,
-            'Acme\\\\SyliusExamplePlugin' => $vendor . '\\\\' . $pluginNameWithSuffix,
+            'SyliusExamplePlugin' => $vendor . '\\\\' . $pluginNameWithSuffix,
         ]);
 
         replaceInFile('README.md', [
