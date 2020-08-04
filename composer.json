@@ -9,16 +9,17 @@
     "license": "MIT",
     "require": {
         "php": "^7.3",
-        "sylius/sylius": "^1.7"
+        "sylius/sylius": "^1.7",
+        "symfony/config": "^4.4 || ^5.0"
     },
     "require-dev": {
         "lakion/mink-debug-extension": "^1.2.3",
-        "matthiasnoback/symfony-config-test": "^4.1",
+        "matthiasnoback/symfony-config-test": "^4.2",
         "matthiasnoback/symfony-dependency-injection-test": "^4.1",
-        "phpspec/phpspec": "^6.1",
-        "phpunit/phpunit": "^8.5",
+        "phpspec/phpspec": "^6.2",
+        "phpunit/phpunit": "^9.2",
         "roave/security-advisories": "dev-master",
-        "setono/code-quality-pack": "^1.0",
+        "setono/code-quality-pack": "^1.2",
         "symfony/browser-kit": "^4.4 || ^5.0",
         "symfony/debug-bundle": "^4.4 || ^5.0",
         "symfony/dotenv": "^4.4 || ^5.0",
@@ -49,7 +50,10 @@
     },
     "prefer-stable": true,
     "scripts": {
-        "analyse": "vendor/bin/phpstan analyse -c phpstan.neon -l max src",
+        "analyse": [
+            "vendor/bin/phpstan analyse -c phpstan.neon -l max src",
+            "vendor/bin/psalm"
+        ],
         "check-style": "vendor/bin/ecs check src/ spec/ tests/",
         "fix-style": "vendor/bin/ecs check src/ spec/ tests/ --fix",
         "phpspec": "vendor/bin/phpspec run -vvv",
