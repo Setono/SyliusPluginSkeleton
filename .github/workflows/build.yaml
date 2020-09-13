@@ -35,14 +35,13 @@ jobs:
                     extensions: ${{ env.PHP_EXTENSIONS }}
                     coverage: none
 
-            -   name: Get composer cache directory
-                id: composercache
-                run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+            -   name: "Determine composer cache directory"
+                uses: "./.github/actions/composer/composer/determine-cache-directory"
 
             -   name: Cache composer dependencies
                 uses: actions/cache@v2
                 with:
-                    path: ${{ steps.composercache.outputs.dir }}
+                    path: "${{ env.COMPOSER_CACHE_DIR }}"
                     key: ${{ runner.os }}-php-${{ matrix.php-version }}-composer-${{ hashFiles('**/composer.lock') }}
                     restore-keys: ${{ runner.os }}-php-${{ matrix.php-version }}-composer-
 
@@ -86,14 +85,13 @@ jobs:
                     extensions: ${{ env.PHP_EXTENSIONS }}
                     coverage: none
 
-            -   name: Get composer cache directory
-                id: composercache
-                run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+            -   name: "Determine composer cache directory"
+                uses: "./.github/actions/composer/composer/determine-cache-directory"
 
             -   name: Cache composer dependencies
                 uses: actions/cache@v2
                 with:
-                    path: ${{ steps.composercache.outputs.dir }}
+                    path: "${{ env.COMPOSER_CACHE_DIR }}"
                     key: ${{ runner.os }}-php-${{ matrix.php-version }}-composer-${{ hashFiles('**/composer.lock') }}
                     restore-keys: ${{ runner.os }}-php-${{ matrix.php-version }}-composer-
 
@@ -125,14 +123,13 @@ jobs:
                     extensions: ${{ env.PHP_EXTENSIONS }}
                     coverage: none
 
-            -   name: Get composer cache directory
-                id: composercache
-                run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+            -   name: "Determine composer cache directory"
+                uses: "./.github/actions/composer/composer/determine-cache-directory"
 
             -   name: Cache composer dependencies
                 uses: actions/cache@v2
                 with:
-                    path: ${{ steps.composercache.outputs.dir }}
+                    path: "${{ env.COMPOSER_CACHE_DIR }}"
                     key: ${{ runner.os }}-php-${{ matrix.php-version }}-composer-${{ hashFiles('**/composer.lock') }}
                     restore-keys: ${{ runner.os }}-php-${{ matrix.php-version }}-composer-
 
@@ -170,14 +167,13 @@ jobs:
                     extensions: ${{ env.PHP_EXTENSIONS }}
                     coverage: none
 
-            -   name: Get composer cache directory
-                id: composercache
-                run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+            -   name: "Determine composer cache directory"
+                uses: "./.github/actions/composer/composer/determine-cache-directory"
 
             -   name: Cache composer dependencies
                 uses: actions/cache@v2
                 with:
-                    path: ${{ steps.composercache.outputs.dir }}
+                    path: "${{ env.COMPOSER_CACHE_DIR }}"
                     key: ${{ runner.os }}-php-${{ matrix.php-version }}-composer-${{ hashFiles('**/composer.lock') }}
                     restore-keys: ${{ runner.os }}-php-${{ matrix.php-version }}-composer-
 
