@@ -21,6 +21,5 @@ runs:
             env:
                 COMPOSER_INSTALL_DEPENDENCIES: "${{ inputs.dependencies }}"
 
-        -   name: "Show installed composer dependencies"
-            shell: "bash"
+        -   shell: "bash"
             run: "composer show"
