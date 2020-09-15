@@ -9,8 +9,10 @@
     "license": "MIT",
     "require": {
         "php": "^7.3",
-        "sylius/sylius": "^1.7",
-        "symfony/config": "^4.4 || ^5.0"
+        "sylius/core-bundle": "^1.8",
+        "symfony/config": "^4.4 || ^5.0",
+        "symfony/dependency-injection": "^4.4 || ^5.0",
+        "symfony/http-kernel": "^4.4 || ^5.0"
     },
     "require-dev": {
         "api-platform/core": "^2.5",
@@ -22,6 +24,7 @@
         "phpunit/phpunit": "^9.2",
         "roave/security-advisories": "dev-master",
         "setono/code-quality-pack": "^1.4",
+        "sylius/sylius": "^1.8",
         "symfony/debug-bundle": "^5.1",
         "symfony/dotenv": "^5.1",
         "symfony/intl": "^4.4 || ^5.0",
