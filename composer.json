@@ -15,6 +15,7 @@
     "require-dev": {
         "api-platform/core": "^2.5",
         "lakion/mink-debug-extension": "^1.2.3",
+        "lexik/jwt-authentication-bundle": "^2.8",
         "matthiasnoback/symfony-config-test": "^4.2",
         "matthiasnoback/symfony-dependency-injection-test": "^4.1",
         "phpspec/phpspec": "^6.2",
