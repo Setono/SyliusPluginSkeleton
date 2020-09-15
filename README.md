@@ -4,7 +4,7 @@
 [![Latest Unstable Version][ico-unstable-version]][link-packagist]
 [![Software License][ico-license]](LICENSE)
 [![Build Status][ico-github-actions]][link-github-actions]
-[![Quality Score][ico-code-quality]][link-code-quality]
+[![Code Coverage][ico-code-coverage]][link-code-coverage]
 
 [Setono](https://setono.com) have made a bunch of [plugins for Sylius](https://github.com/Setono), and we have some guidelines
 which we try to follow when developing plugins. These guidelines are used in this repository and it gives you a very
@@ -38,8 +38,8 @@ To be able to setup a plugin's database, remember to configure you database cred
 [ico-unstable-version]: https://poser.pugx.org/setono/sylius-plugin-skeleton/v/unstable
 [ico-license]: https://poser.pugx.org/setono/sylius-plugin-skeleton/license
 [ico-github-actions]: https://github.com/Setono/SyliusPluginSkeleton/workflows/build/badge.svg
-[ico-code-quality]: https://img.shields.io/scrutinizer/g/Setono/SyliusPluginSkeleton.svg?style=flat-square
+[ico-code-coverage]: https://codecov.io/gh/Setono/SyliusPluginSkeleton/branch/master/graph/badge.svg
 
 [link-packagist]: https://packagist.org/packages/setono/sylius-plugin-skeleton
 [link-github-actions]: https://github.com/Setono/SyliusPluginSkeleton/actions
-[link-code-quality]: https://scrutinizer-ci.com/g/Setono/SyliusPluginSkeleton
+[link-code-coverage]: https://codecov.io/gh/Setono/SyliusPluginSkeleton
