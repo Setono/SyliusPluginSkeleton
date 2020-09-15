@@ -15,8 +15,12 @@ runs:
     using: "composite"
 
     steps:
-        - name: "Install ${{ inputs.dependencies }} dependencies with composer"
-          shell: "bash"
-          run: "${{ github.action_path }}/run.sh"
-          env:
-              COMPOSER_INSTALL_DEPENDENCIES: "${{ inputs.dependencies }}"
+        -   name: "Install ${{ inputs.dependencies }} dependencies with composer"
+            shell: "bash"
+            run: "${{ github.action_path }}/run.sh"
+            env:
+                COMPOSER_INSTALL_DEPENDENCIES: "${{ inputs.dependencies }}"
+
+        -   name: "Show installed composer dependencies"
+            shell: "bash"
+            run: "composer show"
