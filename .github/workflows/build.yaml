@@ -202,8 +202,9 @@ jobs:
                 with:
                     dependencies: "${{ matrix.dependencies }}"
                 
-            -   name: "Lint container"
-                run: "(cd tests/Application && bin/console lint:container)"
+            # Removed linting until this issue is fixed: https://github.com/symfony/symfony/issues/38056
+            #-   name: "Lint container"
+            #    run: "(cd tests/Application && bin/console lint:container)"
 
             -   name: "Create database"
                 run: "(cd tests/Application && bin/console doctrine:database:create -vvv)"
