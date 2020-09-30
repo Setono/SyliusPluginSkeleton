@@ -277,7 +277,7 @@ jobs:
             -   name: "Checkout"
                 uses: "actions/checkout@v2.3.2"
 
-            -   name: "Install PHP with extensions"
+            -   name: "Setup PHP, with composer and extensions"
                 uses: "shivammathur/setup-php@2.5.0"
                 with:
                     coverage: "pcov"
