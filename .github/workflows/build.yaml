@@ -38,23 +38,13 @@ jobs:
                     extensions: "${{ env.PHP_EXTENSIONS }}"
                     coverage: "none"
 
-            -   name: "Determine composer cache directory"
-                uses: "./.github/actions/composer/composer/determine-cache-directory"
-
-            -   name: "Cache composer dependencies"
-                uses: "actions/cache@v2"
+            -   name: "Install composer dependencies"
+                uses: "ramsey/composer-install@v1"
                 with:
-                    path: "${{ env.COMPOSER_CACHE_DIR }}"
-                    key: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-${{ hashFiles('composer.lock') }}"
-                    restore-keys: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-"
-
+                    dependency-versions: "${{ matrix.dependencies }}"
+            
             -   name: "Validate composer"
                 run: "composer validate --strict"
-
-            -   name: "Install ${{ matrix.dependencies }} dependencies with composer"
-                uses: "./.github/actions/composer/composer/install"
-                with:
-                    dependencies: "${{ matrix.dependencies }}"
 
             -   name: "Check composer normalized"
                 run: "composer normalize --dry-run"
@@ -93,20 +83,10 @@ jobs:
                     php-version: "${{ matrix.php-version }}"
                     tools: "composer-require-checker, composer-unused"
                     
-            -   name: "Determine composer cache directory"
-                uses: "./.github/actions/composer/composer/determine-cache-directory"
-
-            -   name: "Cache dependencies installed with composer"
-                uses: "actions/cache@v2.1.1"
+            -   name: "Install composer dependencies"
+                uses: "ramsey/composer-install@v1"
                 with:
-                    path: "${{ env.COMPOSER_CACHE_DIR }}"
-                    key: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-${{ hashFiles('composer.lock') }}"
-                    restore-keys: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-"
-
-            -   name: "Install ${{ matrix.dependencies }} dependencies with composer"
-                uses: "./.github/actions/composer/composer/install"
-                with:
-                    dependencies: "${{ matrix.dependencies }}"
+                    dependency-versions: "${{ matrix.dependencies }}"
 
             -   name: "Run maglnet/composer-require-checker"
                 run: "composer-require-checker check --config-file=$(pwd)/composer-require-checker.json"
@@ -139,20 +119,10 @@ jobs:
                     extensions: "${{ env.PHP_EXTENSIONS }}"
                     coverage: "none"
 
-            -   name: "Determine composer cache directory"
-                uses: "./.github/actions/composer/composer/determine-cache-directory"
-
-            -   name: "Cache composer dependencies"
-                uses: "actions/cache@v2"
+            -   name: "Install composer dependencies"
+                uses: "ramsey/composer-install@v1"
                 with:
-                    path: "${{ env.COMPOSER_CACHE_DIR }}"
-                    key: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-${{ hashFiles('composer.lock') }}"
-                    restore-keys: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-"
-
-            -   name: "Install ${{ matrix.dependencies }} dependencies with composer"
-                uses: "./.github/actions/composer/composer/install"
-                with:
-                    dependencies: "${{ matrix.dependencies }}"
+                    dependency-versions: "${{ matrix.dependencies }}"
 
             -   name: "Static analysis"
                 run: "composer analyse"
@@ -183,20 +153,10 @@ jobs:
                     extensions: "${{ env.PHP_EXTENSIONS }}"
                     coverage: "none"
 
-            -   name: "Determine composer cache directory"
-                uses: "./.github/actions/composer/composer/determine-cache-directory"
-
-            -   name: "Cache composer dependencies"
-                uses: "actions/cache@v2"
+            -   name: "Install composer dependencies"
+                uses: "ramsey/composer-install@v1"
                 with:
-                    path: "${{ env.COMPOSER_CACHE_DIR }}"
-                    key: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-${{ hashFiles('composer.lock') }}"
-                    restore-keys: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-"
-
-            -   name: "Install ${{ matrix.dependencies }} dependencies with composer"
-                uses: "./.github/actions/composer/composer/install"
-                with:
-                    dependencies: "${{ matrix.dependencies }}"
+                    dependency-versions: "${{ matrix.dependencies }}"
 
             -   name: "Run phpspec"
                 run: "composer phpspec"
@@ -233,20 +193,10 @@ jobs:
                     extensions: "${{ env.PHP_EXTENSIONS }}"
                     coverage: "none"
 
-            -   name: "Determine composer cache directory"
-                uses: "./.github/actions/composer/composer/determine-cache-directory"
-
-            -   name: "Cache composer dependencies"
-                uses: "actions/cache@v2"
+            -   name: "Install composer dependencies"
+                uses: "ramsey/composer-install@v1"
                 with:
-                    path: "${{ env.COMPOSER_CACHE_DIR }}"
-                    key: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-${{ hashFiles('composer.lock') }}"
-                    restore-keys: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-"
-
-            -   name: "Install ${{ matrix.dependencies }} dependencies with composer"
-                uses: "./.github/actions/composer/composer/install"
-                with:
-                    dependencies: "${{ matrix.dependencies }}"
+                    dependency-versions: "${{ matrix.dependencies }}"
                 
             # Removed linting until this issue is fixed: https://github.com/symfony/symfony/issues/38056
             #-   name: "Lint container"
@@ -287,20 +237,10 @@ jobs:
             -   name: "Set up problem matchers for phpunit/phpunit"
                 run: "echo \"::add-matcher::${{ runner.tool_cache }}/phpunit.json\""
 
-            -   name: "Determine composer cache directory"
-                uses: "./.github/actions/composer/composer/determine-cache-directory"
-
-            -   name: "Cache dependencies installed with composer"
-                uses: "actions/cache@v2.1.1"
+            -   name: "Install composer dependencies"
+                uses: "ramsey/composer-install@v1"
                 with:
-                    path: "${{ env.COMPOSER_CACHE_DIR }}"
-                    key: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-${{ hashFiles('composer.lock') }}"
-                    restore-keys: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-"
-
-            -   name: "Install ${{ matrix.dependencies }} dependencies with composer"
-                uses: "./.github/actions/composer/composer/install"
-                with:
-                    dependencies: "${{ matrix.dependencies }}"
+                    dependency-versions: "${{ matrix.dependencies }}"
 
             -   name: "Collect code coverage with pcov and phpunit/phpunit"
                 run: "vendor/bin/phpunit --coverage-clover=.build/logs/clover.xml"
