@@ -57,7 +57,7 @@
     "prefer-stable": true,
     "scripts": {
         "analyse": [
-            "phpstan analyse -c phpstan.neon",
+            "phpstan analyse",
             "psalm"
         ],
         "check-style": "ecs check src/ spec/ tests/",
