@@ -20,6 +20,7 @@
         "matthiasnoback/symfony-config-test": "^4.2",
         "matthiasnoback/symfony-dependency-injection-test": "^4.2",
         "phpunit/phpunit": "^9.5",
+        "psalm/plugin-symfony": "^2.1",
         "roave/security-advisories": "dev-master",
         "setono/code-quality-pack": "^1.5.1",
         "sylius/sylius": "^1.8",
@@ -55,8 +56,8 @@
     "prefer-stable": true,
     "scripts": {
         "analyse": "psalm",
-        "check-style": "ecs check src/ spec/ tests/",
-        "fix-style": "ecs check src/ spec/ tests/ --fix",
+        "check-style": "ecs check src/ tests/",
+        "fix-style": "ecs check src/ tests/ --fix",
         "phpunit": "phpunit"
     }
 }
