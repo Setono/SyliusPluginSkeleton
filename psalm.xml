@@ -13,4 +13,9 @@
             <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
+    <plugins>
+        <pluginClass class="Psalm\SymfonyPsalmPlugin\Plugin">
+            <containerXml>tests/Application/var/cache/dev/ApplicationTests_Acme_SyliusExamplePlugin_Application_KernelDevDebugContainer.xml</containerXml>
+        </pluginClass>
+    </plugins>
 </psalm>
