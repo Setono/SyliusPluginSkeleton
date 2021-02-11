@@ -155,9 +155,6 @@ jobs:
                 with:
                     dependency-versions: "${{ matrix.dependencies }}"
 
-            -   name: "Run phpspec"
-                run: "composer phpspec"
-
             -   name: "Run phpunit"
                 run: "composer phpunit"
 

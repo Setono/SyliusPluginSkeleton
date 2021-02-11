@@ -19,7 +19,6 @@
         "lexik/jwt-authentication-bundle": "^2.10",
         "matthiasnoback/symfony-config-test": "^4.2",
         "matthiasnoback/symfony-dependency-injection-test": "^4.2",
-        "phpspec/phpspec": "^7.0",
         "phpunit/phpunit": "^9.5",
         "roave/security-advisories": "dev-master",
         "setono/code-quality-pack": "^1.5.1",
@@ -55,13 +54,9 @@
     },
     "prefer-stable": true,
     "scripts": {
-        "analyse": [
-            "phpstan analyse",
-            "psalm"
-        ],
+        "analyse": "psalm",
         "check-style": "ecs check src/ spec/ tests/",
         "fix-style": "ecs check src/ spec/ tests/ --fix",
-        "phpspec": "phpspec run",
         "phpunit": "phpunit"
     }
 }
