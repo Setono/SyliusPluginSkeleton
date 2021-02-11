@@ -1,9 +1,7 @@
 <?xml version="1.0"?>
 <psalm
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    errorLevel="1"
     totallyTyped="true"
-    resolveFromConfigFile="true"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
 >
@@ -15,7 +13,7 @@
     </projectFiles>
     <plugins>
         <pluginClass class="Psalm\SymfonyPsalmPlugin\Plugin">
-            <containerXml>tests/Application/var/cache/dev/ApplicationTests_Acme_SyliusExamplePlugin_Application_KernelDevDebugContainer.xml</containerXml>
+            <containerXml>tests/Application/var/cache/test/ApplicationTests_Acme_SyliusExamplePlugin_Application_KernelTestDebugContainer.xml</containerXml>
         </pluginClass>
     </plugins>
 </psalm>
