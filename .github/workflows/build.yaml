@@ -122,6 +122,9 @@ jobs:
                 with:
                     dependency-versions: "${{ matrix.dependencies }}"
 
+            -   name: "Cache warmup"
+                run: "(cd tests/Application && bin/console cache:warmup)"
+            
             -   name: "Static analysis"
                 run: "composer analyse"
 
