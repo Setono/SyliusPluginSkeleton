@@ -58,6 +58,7 @@ use Symfony\Component\Process\Process;
                 'AcmeSyliusExamplePlugin' => $vendor.$pluginNameWithSuffix,
                 'AcmeSyliusExample' => $vendor.$pluginName,
                 'Acme' => $vendor,
+                'SyliusExamplePlugin' => $pluginNameWithSuffix,
             ]);
         }
 
