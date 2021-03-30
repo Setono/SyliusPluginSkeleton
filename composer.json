@@ -21,7 +21,7 @@
         "matthiasnoback/symfony-dependency-injection-test": "^4.2",
         "phpunit/phpunit": "^9.5",
         "psalm/plugin-symfony": "^2.1",
-        "roave/security-advisories": "dev-master",
+        "roave/security-advisories": "dev-latest",
         "setono/code-quality-pack": "^1.5.1",
         "sylius/sylius": "^1.8.9",
         "symfony/debug-bundle": "^5.1",
