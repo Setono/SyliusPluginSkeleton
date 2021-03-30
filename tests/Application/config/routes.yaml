@@ -1,2 +1,0 @@
-acme_sylius_example:
-    resource: "@AcmeSyliusExamplePlugin/Resources/config/routes.yaml"
