@@ -78,7 +78,7 @@ use Symfony\Component\Process\Process;
         rename('src/AcmeSyliusExamplePlugin.php', sprintf('src/%s%s.php', $vendor, $pluginNameWithSuffix));
         rename('tests/DependencyInjection/AcmeSyliusExampleExtensionTest.php', sprintf('tests/DependencyInjection/%s%sExtensionTest.php', $vendor, $pluginName));
         rename('tests/Application/config/packages/acme_sylius_example.yaml', sprintf('tests/Application/config/packages/%s.yaml', $yamlNamespace));
-        rename('tests/Application/config/routes/acme_sylius_example.yaml', sprintf('tests/Application/config/packages/%s.yaml', $yamlNamespace));
+        rename('tests/Application/config/routes/acme_sylius_example.yaml', sprintf('tests/Application/config/routes/%s.yaml', $yamlNamespace));
 
         $process = new Process(['composer', 'dump-autoload']);
         $process->run();
