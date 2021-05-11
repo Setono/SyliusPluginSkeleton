@@ -29,7 +29,8 @@ final class ConfigurationTest extends TestCase
             [
                 [], // no values at all
             ],
-            'The child config "option" under "acme_sylius_example" must be configured: This is an example configuration option'
+            '/The child (config|node) "option" (under|at path) "acme_sylius_example" must be configured/',
+            true
         );
     }
 
