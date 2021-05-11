@@ -24,7 +24,6 @@ final class Configuration implements ConfigurationInterface
                     ->info('This is an example configuration option')
                     ->isRequired()
                     ->cannotBeEmpty()
-                ->end()
         ;
 
         return $treeBuilder;
