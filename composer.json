@@ -20,6 +20,7 @@
         "matthiasnoback/symfony-config-test": "^4.2",
         "matthiasnoback/symfony-dependency-injection-test": "^4.2",
         "phpunit/phpunit": "^9.5",
+        "psalm/plugin-phpunit": "^0.15.1",
         "psalm/plugin-symfony": "^2.1",
         "roave/security-advisories": "dev-latest",
         "setono/code-quality-pack": "^2.1",
@@ -60,7 +61,7 @@
             "psalm"
         ],
         "check-style": "ecs check",
-        "ensure-test-container-exists": "[[ -f tests/Application/var/cache/test/ApplicationTests_Acme_SyliusExamplePlugin_Application_KernelTestDebugContainer.xml ]] || tests/Application/bin/console cache:warmup --env=test",
+        "ensure-test-container-exists": "[[ -f tests/Application/var/cache/test/Tests_Acme_SyliusExamplePlugin_Application_KernelTestDebugContainer.xml ]] || tests/Application/bin/console cache:warmup --env=test",
         "fix-style": "ecs check --fix",
         "phpunit": "phpunit"
     }

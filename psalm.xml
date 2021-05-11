@@ -7,13 +7,16 @@
 >
     <projectFiles>
         <directory name="src"/>
+        <directory name="tests"/>
         <ignoreFiles>
+            <directory name="tests/Application"/>
             <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
     <plugins>
         <pluginClass class="Psalm\SymfonyPsalmPlugin\Plugin">
-            <containerXml>tests/Application/var/cache/test/ApplicationTests_Acme_SyliusExamplePlugin_Application_KernelTestDebugContainer.xml</containerXml>
+            <containerXml>tests/Application/var/cache/test/Tests_Acme_SyliusExamplePlugin_Application_KernelTestDebugContainer.xml</containerXml>
         </pluginClass>
+        <pluginClass class="Psalm\PhpUnitPlugin\Plugin"/>
     </plugins>
 </psalm>
