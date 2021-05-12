@@ -28,7 +28,7 @@ jobs:
 
         steps:
             -   name: "Checkout"
-                uses: "actions/checkout@v2"
+                uses: "actions/checkout@v2.3.4"
 
             -   name: "Setup PHP, with composer and extensions"
                 uses: "shivammathur/setup-php@v2"
@@ -72,7 +72,7 @@ jobs:
 
         steps:
             -   name: "Checkout"
-                uses: "actions/checkout@v2"
+                uses: "actions/checkout@v2.3.4"
 
             -   name: "Setup PHP, with composer and extensions"
                 uses: "shivammathur/setup-php@v2"
@@ -108,7 +108,7 @@ jobs:
 
         steps:
             -   name: "Checkout"
-                uses: "actions/checkout@v2"
+                uses: "actions/checkout@v2.3.4"
 
             -   name: "Setup PHP, with composer and extensions"
                 uses: "shivammathur/setup-php@v2"
@@ -144,7 +144,7 @@ jobs:
 
         steps:
             -   name: "Checkout"
-                uses: "actions/checkout@v2"
+                uses: "actions/checkout@v2.3.4"
 
             -   name: "Setup PHP, with composer and extensions"
                 uses: "shivammathur/setup-php@v2"
@@ -180,7 +180,7 @@ jobs:
                 run: "sudo /etc/init.d/mysql start"
 
             -   name: "Checkout"
-                uses: "actions/checkout@v2"
+                uses: "actions/checkout@v2.3.4"
 
             -   name: "Setup PHP, with composer and extensions"
                 uses: "shivammathur/setup-php@v2"
@@ -221,7 +221,7 @@ jobs:
 
         steps:
             -   name: "Checkout"
-                uses: "actions/checkout@v2"
+                uses: "actions/checkout@v2.3.4"
 
             -   name: "Setup PHP, with composer and extensions"
                 uses: "shivammathur/setup-php@v2"
