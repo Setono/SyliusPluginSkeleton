@@ -32,7 +32,8 @@
         "symfony/maker-bundle": "^1.33",
         "symfony/property-info": "^5.3",
         "symfony/serializer": "^5.3",
-        "symfony/web-profiler-bundle": "^5.3"
+        "symfony/web-profiler-bundle": "^5.3",
+        "symfony/webpack-encore-bundle": "^1.12"
     },
     "config": {
         "sort-packages": true
