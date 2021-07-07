@@ -14,9 +14,9 @@ Enjoy!
 
 ## Quickstart
 
-1. Run `composer create-project setono/sylius-plugin-skeleton:dev-master ProjectName`.
-
-2. From the plugin skeleton root directory, run the following commands:
+1. Run `composer create-project --prefer-source --no-install --remove-vcs setono/sylius-plugin-skeleton:dev-master ProjectName` or just click the `Use this template` button at the right corner of this repository.
+2. Run `cd ProjectName && composer install`
+3. From the plugin skeleton root directory, run the following commands:
 
     ```bash
     $ php init
