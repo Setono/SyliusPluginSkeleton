@@ -12,11 +12,3 @@ updates:
       schedule:
           interval: "daily"
       versioning-strategy: "widen"
-
-    - commit-message:
-          include: "scope"
-          prefix: "github-actions"
-      directory: "/"
-      package-ecosystem: "github-actions"
-      schedule:
-          interval: "daily"
