@@ -3,9 +3,7 @@
 version: 2
 
 updates:
-    -   allow:
-            -   dependency-type: development
-        commit-message:
+    -   commit-message:
             include: "scope"
             prefix: "composer"
         directory: "/"
@@ -13,19 +11,7 @@ updates:
         package-ecosystem: "composer"
         schedule:
             interval: "weekly"
-        versioning-strategy: "increase"
-
-    -   allow:
-            -   dependency-type: production
-        commit-message:
-            include: "scope"
-            prefix: "composer"
-        directory: "/"
-        open-pull-requests-limit: 1
-        package-ecosystem: "composer"
-        schedule:
-            interval: "weekly"
-        versioning-strategy: "widen"
+        versioning-strategy: "increase-if-necessary"
 
     -   commit-message:
             include: "scope"
