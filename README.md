@@ -7,7 +7,7 @@
 [![Code Coverage][ico-code-coverage]][link-code-coverage]
 
 [Setono](https://setono.com) have made a bunch of [plugins for Sylius](https://github.com/Setono), and we have some guidelines
-which we try to follow when developing plugins. These guidelines are used in this repository and it gives you a very
+which we try to follow when developing plugins. These guidelines are used in this repository, and it gives you a very
 solid base when developing plugins.
 
 Enjoy! 
