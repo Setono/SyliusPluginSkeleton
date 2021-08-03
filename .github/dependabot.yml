@@ -4,6 +4,7 @@ version: 2
 
 updates:
     -   allow:
+            -   dependency-type: "direct"
             -   dependency-name: "symfony*"
                 dependency-type: "development"
         commit-message:
