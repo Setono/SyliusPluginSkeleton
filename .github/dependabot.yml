@@ -21,4 +21,3 @@ updates:
         package-ecosystem: "github-actions"
         schedule:
             interval: "weekly"
-        versioning-strategy: "increase"
