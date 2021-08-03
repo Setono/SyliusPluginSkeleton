@@ -3,16 +3,22 @@
 version: 2
 
 updates:
-    -   commit-message:
+    -   allow:
+            - dependency-type: development
+        commit-message:
             include: "scope"
             prefix: "composer"
         directory: "/"
+        labels:
+            - "composer"
+            - "dependencies"
+            - "development"
         open-pull-requests-limit: 1
         package-ecosystem: "composer"
         schedule:
             interval: "daily"
-        versioning-strategy: "widen"
-    
+        versioning-strategy: "increase"
+
     -   commit-message:
             include: "scope"
             prefix: "github-actions"
