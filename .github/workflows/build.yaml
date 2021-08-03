@@ -276,7 +276,7 @@ jobs:
             -   name: "Request review from @setonobot"
                 uses: "actions/github-script@v4.0.2"
                 with:
-                    github-token: "${{ secrets.SETONOBOT_TOKEN }}"
+                    #github-token: "${{ secrets.SETONOBOT_TOKEN }}"
                     script: |
                         const pullRequest = context.payload.pull_request
                         const repository = context.repo
@@ -295,7 +295,7 @@ jobs:
             -   name: "Assign @setonobot"
                 uses: "actions/github-script@v4.0.2"
                 with:
-                    github-token: "${{ secrets.SETONOBOT_TOKEN }}"
+                    #github-token: "${{ secrets.SETONOBOT_TOKEN }}"
                     script: |
                         const pullRequest = context.payload.pull_request
                         const repository = context.repo
@@ -314,7 +314,7 @@ jobs:
             -   name: "Approve pull request"
                 uses: "actions/github-script@v4.0.2"
                 with:
-                    github-token: "${{ secrets.SETONOBOT_TOKEN }}"
+                    #github-token: "${{ secrets.SETONOBOT_TOKEN }}"
                     script: |
                         const pullRequest = context.payload.pull_request
                         const repository = context.repo
@@ -329,7 +329,7 @@ jobs:
             -   name: "Merge pull request"
                 uses: "actions/github-script@v4.0.2"
                 with:
-                    github-token: "${{ secrets.SETONOBOT_TOKEN }}"
+                    #github-token: "${{ secrets.SETONOBOT_TOKEN }}"
                     script: |
                         const pullRequest = context.payload.pull_request
                         const repository = context.repo
