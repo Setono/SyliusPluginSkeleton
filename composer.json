@@ -12,7 +12,7 @@
         "sylius/admin-api-bundle": "^1.10",
         "symfony/config": "^4.4 || ^5.0",
         "symfony/dependency-injection": "^4.4 || ^5.0",
-        "symfony/http-kernel": "^4.4 || ^5.1.5"
+        "symfony/http-kernel": "^5.3.7"
     },
     "require-dev": {
         "api-platform/core": "^2.6",
