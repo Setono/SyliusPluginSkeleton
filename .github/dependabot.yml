@@ -14,3 +14,15 @@ updates:
         schedule:
             interval: "weekly"
         versioning-strategy: "increase"
+
+    -   allow:
+            -   dependency-type: "production"
+        commit-message:
+            include: "scope"
+            prefix: "composer"
+        directory: "/"
+        open-pull-requests-limit: 10
+        package-ecosystem: "composer"
+        schedule:
+            interval: "weekly"
+        versioning-strategy: "widen"
