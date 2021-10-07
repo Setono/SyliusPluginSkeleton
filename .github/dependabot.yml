@@ -4,9 +4,7 @@ version: 2
 
 updates:
     -   allow:
-            -   dependency-type: "direct"
-            -   dependency-name: "symfony*"
-                dependency-type: "development"
+            -   dependency-type: "development"
         commit-message:
             include: "scope"
             prefix: "composer"
@@ -16,12 +14,3 @@ updates:
         schedule:
             interval: "weekly"
         versioning-strategy: "increase"
-
-    -   commit-message:
-            include: "scope"
-            prefix: "github-actions"
-        directory: "/"
-        open-pull-requests-limit: 10
-        package-ecosystem: "github-actions"
-        schedule:
-            interval: "weekly"
