@@ -9,7 +9,6 @@
     "license": "MIT",
     "require": {
         "php": ">=7.4",
-        "sylius/admin-api-bundle": "^1.10",
         "symfony/config": "^4.4 || ^5.0",
         "symfony/dependency-injection": "^4.4 || ^5.0",
         "symfony/http-kernel": "^4.4 || ^5.1.5"
@@ -25,6 +24,7 @@
         "psalm/plugin-symfony": "^2.4",
         "roave/security-advisories": "dev-latest",
         "setono/code-quality-pack": "^2.1.2",
+        "sylius/admin-api-bundle": "^1.10",
         "sylius/sylius": "~1.10.0",
         "symfony/debug-bundle": "^5.3",
         "symfony/dotenv": "^5.3",
