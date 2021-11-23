@@ -4,7 +4,7 @@ version: 2
 
 updates:
     -   allow:
-            -   dependency-type: "production"
+            -   dependency-type: "development"
         commit-message:
             include: "scope"
             prefix: "composer"
@@ -13,4 +13,4 @@ updates:
         package-ecosystem: "composer"
         schedule:
             interval: "weekly"
-        versioning-strategy: "widen"
+        versioning-strategy: "increase"
