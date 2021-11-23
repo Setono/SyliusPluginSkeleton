@@ -114,7 +114,12 @@ jobs:
                     - "7.4"
 
                 dependencies:
+                    - "lowest"
                     - "highest"
+
+                symfony:
+                    - "^4.4"
+                    - "^5.3"
 
         steps:
             -   name: "Checkout"
@@ -155,6 +160,10 @@ jobs:
                     - "lowest"
                     - "highest"
 
+                symfony:
+                    - "^4.4"
+                    - "^5.3"
+
         steps:
             -   name: "Checkout"
                 uses: "actions/checkout@v2"
@@ -188,7 +197,12 @@ jobs:
                     - "7.4"
 
                 dependencies:
+                    - "lowest"
                     - "highest"
+                        
+                symfony:
+                    - "^4.4"
+                    - "^5.3"
 
         steps:
             -   name: "Start MySQL"
