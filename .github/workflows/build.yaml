@@ -142,6 +142,9 @@ jobs:
 
             -   name: "Cache warmup"
                 run: "(cd tests/Application && bin/console cache:warmup)"
+                
+            -   name: "Copy container XML to Symfony 5 format"
+                run: '[ -f "tests/Application/var/cache/test/ApplicationTests_Acme_SyliusExamplePlugin_Application_KernelTestDebugContainer.xml" ] && mv "tests/Application/var/cache/test/ApplicationTests_Acme_SyliusExamplePlugin_Application_KernelTestDebugContainer.xml" tests/Application/var/cache/test/Tests_Acme_SyliusExamplePlugin_Application_KernelTestDebugContainer.xml'
             
             -   name: "Static analysis"
                 run: "composer analyse"
