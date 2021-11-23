@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-    - name: GitHub Community Support
-      url: https://github.community/
-      about: Please ask and answer questions here.
-    - name: GitHub Security Bug Bounty
-      url: https://bounty.github.com/
-      about: Please report security vulnerabilities here.
+    - name: Support question?
+      url: https://sylius-devs.slack.com/archives/C3EGDG9LY
+      about: Please ask questions on the Sylius support channel. It's okay to tag a developer, but please understand that we also have other obligations ;)
+    - name: Security issue
+      url: security@setono.com
+      about: Please send security vulnerabilities directly on email
