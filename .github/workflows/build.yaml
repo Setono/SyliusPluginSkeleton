@@ -228,8 +228,7 @@ jobs:
                 
             -   name: "Lint container"
                 # Do not lint on SF4 because we get this error: Invalid definition for service "doctrine.migrations.dependency_factory": argument 2 of "Doctrine\Migrations\DependencyFactory::setDefinition()" accepts "callable", "SyliusLabs\DoctrineMigrationsExtraBundle\Factory\ContainerAwareVersionFactory" passed. 
-                if: "${{ matrix.symfony }} != '^4.4'"
-                run: "(echo ${{ matrix.symfony }} && cd tests/Application && bin/console lint:container)"
+                run: '([ "${{ matrix.symfony }}" != "^4.4" ] && cd tests/Application && bin/console lint:container)'
 
             -   name: "Create database"
                 run: "(cd tests/Application && bin/console doctrine:database:create -vvv)"
