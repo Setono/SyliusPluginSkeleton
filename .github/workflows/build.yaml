@@ -71,7 +71,6 @@ jobs:
                     - "7.4"
 
                 dependencies:
-                    - "lowest"
                     - "highest"
                         
                 symfony:
@@ -114,7 +113,6 @@ jobs:
                     - "7.4"
 
                 dependencies:
-                    - "lowest"
                     - "highest"
 
                 symfony:
@@ -157,7 +155,6 @@ jobs:
                     - "7.4"
                         
                 dependencies:
-                    - "lowest"
                     - "highest"
 
                 symfony:
@@ -197,7 +194,6 @@ jobs:
                     - "7.4"
 
                 dependencies:
-                    - "lowest"
                     - "highest"
                         
                 symfony:
@@ -228,9 +224,8 @@ jobs:
                 
             -   name: "Lint container"
                 # Do not lint on SF4 because we get this error: Invalid definition for service "doctrine.migrations.dependency_factory": argument 2 of "Doctrine\Migrations\DependencyFactory::setDefinition()" accepts "callable", "SyliusLabs\DoctrineMigrationsExtraBundle\Factory\ContainerAwareVersionFactory" passed.
-                # Do not lint on lowest deps because we get this error: PHP Fatal error:  Declaration of Payum\Bundle\PayumBundle\Profiler\PayumCollector::collect(Symfony\Component\HttpFoundation\Request $request, Symfony\Component\HttpFoundation\Response $response, ?Exception $exception = NULL) must be compatible with Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface::collect(Symfony\Component\HttpFoundation\Request $request, Symfony\Component\HttpFoundation\Response $response, ?Throwable $exception = NULL) in /home/runner/work/SyliusPluginSkeleton/SyliusPluginSkeleton/vendor/payum/payum-bundle/Profiler/PayumCollector.php on line 26
                 # Note: We cannot use the if statement here, because of https://github.community/t/matrix-cannot-be-used-in-jobs-level-if/17177/10
-                run: 'if [ "${{ matrix.symfony }}" != "^4.4" ] || [ "${{ matrix.dependencies }}" != "lowest" ]; then (cd tests/Application && bin/console lint:container); fi'
+                run: 'if [ "${{ matrix.symfony }}" != "^4.4" ]; then (cd tests/Application && bin/console lint:container); fi'
 
             -   name: "Create database"
                 run: "(cd tests/Application && bin/console doctrine:database:create -vvv)"
