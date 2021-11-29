@@ -31,7 +31,7 @@
         "symfony/intl": "^4.4 || ^5.3",
         "symfony/maker-bundle": "^1.36",
         "symfony/property-info": "^4.4 || ^5.3",
-        "symfony/serializer": "^4.4 || ^5.3",
+        "symfony/serializer": "^5.4.0",
         "symfony/web-profiler-bundle": "^4.4 || ^5.3",
         "symfony/webpack-encore-bundle": "^1.13"
     },
