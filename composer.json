@@ -30,7 +30,7 @@
         "symfony/dotenv": "^4.4 || ^5.3",
         "symfony/intl": "^4.4 || ^5.3",
         "symfony/maker-bundle": "^1.36",
-        "symfony/property-info": "^4.4 || ^5.3",
+        "symfony/property-info": "^5.4.0",
         "symfony/serializer": "^4.4 || ^5.3",
         "symfony/web-profiler-bundle": "^4.4 || ^5.3",
         "symfony/webpack-encore-bundle": "^1.13"
