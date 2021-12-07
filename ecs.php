@@ -12,6 +12,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         'src', 'tests'
     ]);
     $containerConfigurator->parameters()->set(Option::SKIP, [
-        'tests/Application/**',
+        'tests/Application/node_modules/**',
+        'tests/Application/var/**',
     ]);
 };
