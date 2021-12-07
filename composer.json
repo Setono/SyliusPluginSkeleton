@@ -1,12 +1,12 @@
 {
     "name": "setono/sylius-plugin-skeleton",
-    "type": "sylius-plugin",
     "description": "Acme example plugin for Sylius.",
+    "license": "MIT",
+    "type": "sylius-plugin",
     "keywords": [
         "sylius",
         "sylius-plugin"
     ],
-    "license": "MIT",
     "require": {
         "php": ">=7.4",
         "symfony/config": "^4.4 || ^5.0",
@@ -35,14 +35,7 @@
         "symfony/web-profiler-bundle": "^4.4 || ^5.3",
         "symfony/webpack-encore-bundle": "^1.13"
     },
-    "config": {
-        "sort-packages": true
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.0-dev"
-        }
-    },
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "Acme\\SyliusExamplePlugin\\": "src/"
@@ -56,7 +49,14 @@
             "tests/Application/Kernel.php"
         ]
     },
-    "prefer-stable": true,
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    },
     "scripts": {
         "analyse": [
             "@ensure-test-container-exists",
