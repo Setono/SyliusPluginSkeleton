@@ -12,7 +12,7 @@ on:
 
 env:
     APP_ENV: "test"
-    DATABASE_URL: "mysql://root:root@127.0.0.1/sylius?serverVersion=5.7"
+    DATABASE_URL: "mysql://root:root@127.0.0.1/sylius?serverVersion=8.0"
     PHP_EXTENSIONS: "intl, mbstring"
 
 jobs:
