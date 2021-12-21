@@ -1,4 +1,5 @@
 framework:
+    assets: true
     csrf_protection: true
     form: true
     ide: phpstorm
