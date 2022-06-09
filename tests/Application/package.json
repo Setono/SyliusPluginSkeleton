@@ -1,19 +1,19 @@
 {
   "dependencies": {
-    "chart.js": "^2.9.3",
-    "jquery": "^3.4.0",
-    "jquery.dirtyforms": "^2.0.0",
-    "lightbox2": "^2.9.0",
-    "semantic-ui-css": "^2.2.0",
-    "slick-carousel": "^1.8.1"
+    "chart.js": "^2.9",
+    "jquery": "^3.6",
+    "jquery.dirtyforms": "^2.0",
+    "lightbox2": "^2.9",
+    "semantic-ui-css": "^2.2",
+    "slick-carousel": "^1.8"
   },
   "devDependencies": {
-    "@symfony/webpack-encore": "^1.1.2",
+    "@symfony/webpack-encore": "^1.8",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-import-resolver-babel-module": "^4.0.0",
     "eslint-plugin-import": "^2.11.0",
-    "node-sass": "^4.5.3",
+    "node-sass": "^7.0",
     "sass-loader": "^11.0.0"
   },
   "scripts": {
