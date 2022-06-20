@@ -20,7 +20,7 @@
         "matthiasnoback/symfony-config-test": "^4.3",
         "matthiasnoback/symfony-dependency-injection-test": "^4.3",
         "phpunit/phpunit": "^9.5",
-        "psalm/plugin-phpunit": "^0.16",
+        "psalm/plugin-phpunit": "^0.17",
         "psalm/plugin-symfony": "^3.1",
         "roave/security-advisories": "dev-latest",
         "setono/code-quality-pack": "^2.2",
