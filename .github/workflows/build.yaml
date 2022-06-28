@@ -24,7 +24,7 @@ jobs:
         strategy:
             matrix:
                 php-version:
-                    - "8.1"
+                    - "7.4" # Always use the lowest version of PHP since a higher version would create actual syntax errors in lower versions
 
                 dependencies:
                     - "highest"
