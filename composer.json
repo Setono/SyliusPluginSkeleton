@@ -14,7 +14,7 @@
         "symfony/http-kernel": "^4.4 || ^5.4 || ^6.0"
     },
     "require-dev": {
-        "api-platform/core": "^2.6",
+        "api-platform/core": "^2.7",
         "friendsofsymfony/oauth-server-bundle": ">2.0.0-alpha.0 ^2.0@dev",
         "lexik/jwt-authentication-bundle": "^2.16",
         "matthiasnoback/symfony-config-test": "^4.3",
