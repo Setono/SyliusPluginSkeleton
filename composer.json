@@ -23,7 +23,7 @@
         "psalm/plugin-phpunit": "^0.18",
         "psalm/plugin-symfony": "^4.0",
         "roave/security-advisories": "dev-latest",
-        "setono/code-quality-pack": "^2.2",
+        "setono/code-quality-pack": "^2.3",
         "sylius/admin-api-bundle": "^1.11",
         "sylius/sylius": "~1.10.14",
         "symfony/debug-bundle": "^4.4 || ^5.4 || ^6.0",
