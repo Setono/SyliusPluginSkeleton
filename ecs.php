@@ -2,16 +2,15 @@
 
 declare(strict_types=1);
 
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
-use Symplify\EasyCodingStandard\ValueObject\Option;
+use Symplify\EasyCodingStandard\Config\ECSConfig;
 
-return static function (ContainerConfigurator $configurator): void {
-    $configurator->import('vendor/sylius-labs/coding-standard/ecs.php');
-    $configurator->parameters()->set(Option::PATHS, [
+return static function (ECSConfig $config): void {
+    $config->import('vendor/sylius-labs/coding-standard/ecs.php');
+    $config->paths([
         'src',
         'tests',
     ]);
-    $configurator->parameters()->set(Option::SKIP, [
+    $config->skip([
         'tests/Application/node_modules/**',
         'tests/Application/var/**',
     ]);
