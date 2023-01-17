@@ -1,4 +1,5 @@
 /.github                        export-ignore
+/docs                           export-ignore
 /node_modules                   export-ignore
 /tests                          export-ignore
 /.editorconfig                  export-ignore
@@ -8,4 +9,5 @@
 /ecs.php                        export-ignore
 /phpunit.xml.dist               export-ignore
 /psalm.xml                      export-ignore
+/psalm-baseline.xml             export-ignore
 /README.md                      export-ignore
