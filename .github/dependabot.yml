@@ -14,4 +14,4 @@ updates:
         package-ecosystem: "composer"
         schedule:
             interval: "weekly"
-        versioning-strategy: "increase"
+        versioning-strategy: "increase-if-necessary"
