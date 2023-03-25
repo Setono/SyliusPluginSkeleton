@@ -24,7 +24,7 @@ jobs:
         strategy:
             matrix:
                 php-version:
-                    - "8.0" # Always use the lowest version of PHP since a higher version could create actual syntax errors in lower versions
+                    - "8.1" # Always use the lowest version of PHP since a higher version could create actual syntax errors in lower versions
 
                 dependencies:
                     - "highest"
@@ -71,8 +71,8 @@ jobs:
         strategy:
             matrix:
                 php-version:
-                    - "8.0"
                     - "8.1"
+                    - "8.2"
 
                 dependencies:
                     - "highest"
@@ -114,8 +114,8 @@ jobs:
         strategy:
             matrix:
                 php-version:
-                    - "8.0"
                     - "8.1"
+                    - "8.2"
 
                 dependencies:
                     - "highest"
@@ -157,8 +157,8 @@ jobs:
         strategy:
             matrix:
                 php-version:
-                    - "8.0"
                     - "8.1"
+                    - "8.2"
                 
                 dependencies:
                     - "highest"
@@ -197,8 +197,8 @@ jobs:
         strategy:
             matrix:
                 php-version:
-                    - "8.0"
                     - "8.1"
+                    - "8.2"
 
                 dependencies:
                     - "highest"
@@ -249,7 +249,7 @@ jobs:
         strategy:
             matrix:
                 php-version:
-                    - "8.1"
+                    - "8.2"
 
                 dependencies:
                     - "highest"
