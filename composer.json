@@ -22,7 +22,6 @@
         "phpunit/phpunit": "^9.5",
         "psalm/plugin-phpunit": "^0.18",
         "psalm/plugin-symfony": "^5.0",
-        "roave/security-advisories": "dev-latest",
         "setono/code-quality-pack": "^2.4",
         "sylius/sylius": "~1.12.3",
         "symfony/debug-bundle": "^5.4 || ^6.0",
