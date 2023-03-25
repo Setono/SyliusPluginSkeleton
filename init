@@ -20,7 +20,7 @@ use Symfony\Component\Process\Process;
         $vendor = $questionHelper->ask($input, $output, new Question('What is your plugin namespace (usually this is your organization name)? '));
 
         $q = new Question('What is your plugin name? ');
-        $q->setValidator(static function ($answer) {
+        $q->setValidator(static function (mixed $answer): string {
             if (!is_string($answer)) {
                 throw new \RuntimeException(
                     'Please enter the plugin name.'
@@ -31,7 +31,7 @@ use Symfony\Component\Process\Process;
         });
         $pluginName = $questionHelper->ask($input, $output, $q);
 
-        if ('Plugin' === substr($pluginName, -6)) {
+        if (str_ends_with($pluginName, 'Plugin')) {
             $pluginName = substr($pluginName, 0, -6);
         }
 
