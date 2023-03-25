@@ -18,15 +18,15 @@ Enjoy!
 3. From the plugin skeleton root directory, run the following commands:
 
     ```bash
-    $ php init
-    $ (cd tests/Application && yarn install)
-    $ (cd tests/Application && yarn build)
-    $ (cd tests/Application && bin/console assets:install)
+    php init
+    (cd tests/Application && yarn install)
+    (cd tests/Application && yarn build)
+    (cd tests/Application && bin/console assets:install)
     
-    $ (cd tests/Application && bin/console doctrine:database:create)
-    $ (cd tests/Application && bin/console doctrine:schema:create)
+    (cd tests/Application && bin/console doctrine:database:create)
+    (cd tests/Application && bin/console doctrine:schema:create)
    
-    $ (cd tests/Application && bin/console sylius:fixtures:load -n)
+    (cd tests/Application && bin/console sylius:fixtures:load -n)
     ```
    
 3. Start your local PHP server: `symfony serve` (see https://symfony.com/doc/current/setup/symfony_server.html for docs)
