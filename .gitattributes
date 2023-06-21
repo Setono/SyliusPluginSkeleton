@@ -1,4 +1,5 @@
 /.github                        export-ignore
+/etc                            export-ignore
 /docs                           export-ignore
 /.editorconfig                  export-ignore
 /.gitattributes                 export-ignore
