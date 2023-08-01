@@ -9,6 +9,7 @@
     ],
     "require": {
         "php": ">=8.1",
+        "sylius/core-bundle": "^1.0",
         "symfony/config": "^5.4 || ^6.0",
         "symfony/dependency-injection": "^5.4 || ^6.0",
         "symfony/http-kernel": "^5.4 || ^6.0"
@@ -21,7 +22,6 @@
         "matthiasnoback/symfony-dependency-injection-test": "^4.3",
         "phpunit/phpunit": "^9.5",
         "psalm/plugin-phpunit": "^0.18",
-        "psalm/plugin-symfony": "^5.0",
         "setono/code-quality-pack": "^2.4",
         "sylius/sylius": "~1.12.3",
         "symfony/debug-bundle": "^5.4 || ^6.0",
@@ -60,12 +60,8 @@
         }
     },
     "scripts": {
-        "analyse": [
-            "@ensure-test-container-exists",
-            "psalm"
-        ],
+        "analyse": "psalm",
         "check-style": "ecs check",
-        "ensure-test-container-exists": "[[ -f tests/Application/var/cache/test/Tests_Acme_SyliusExamplePlugin_Application_KernelTestDebugContainer.xml ]] || tests/Application/bin/console cache:warmup --env=test",
         "fix-style": "ecs check --fix",
         "phpunit": "phpunit"
     }
