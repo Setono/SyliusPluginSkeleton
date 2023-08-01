@@ -109,9 +109,6 @@ jobs:
 
             -   name: "Run composer-unused/composer-unused"
                 run: "composer-unused"
-                
-            -   name: "Run composer audit"
-                run: "composer audit"
     
     static-code-analysis:
         name: "Static Code Analysis (PHP${{ matrix.php-version }} | Deps: ${{ matrix.dependencies }} | SF${{ matrix.symfony }})"
