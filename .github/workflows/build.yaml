@@ -145,7 +145,7 @@ jobs:
                     coverage: "none"
                     extensions: "${{ env.PHP_EXTENSIONS }}"
                     php-version: "${{ matrix.php-version }}"
-                    tools: "psalm, flex"
+                    tools: "flex"
 
             -   name: "Remove require-dev section in composer.json"
                 run: "composer config --unset require-dev"
