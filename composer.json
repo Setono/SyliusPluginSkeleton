@@ -19,6 +19,7 @@
         "babdev/pagerfanta-bundle": "^3.8",
         "behat/behat": "^3.12",
         "doctrine/doctrine-bundle": "^2.10",
+        "infection/infection": "^0.26.3",
         "jms/serializer-bundle": "^4.2",
         "lexik/jwt-authentication-bundle": "^2.16",
         "matthiasnoback/symfony-config-test": "^4.3",
@@ -54,6 +55,7 @@
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": false,
             "ergebnis/composer-normalize": true,
+            "infection/extension-installer": true,
             "symfony/thanks": false
         },
         "sort-packages": true
