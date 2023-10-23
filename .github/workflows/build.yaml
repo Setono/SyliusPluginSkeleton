@@ -150,8 +150,8 @@ jobs:
             -   name: "Remove require-dev section in composer.json"
                 run: "composer config --unset require-dev"
                 
-            -   name: "Add Psalm"
-                run: "composer require --no-update --no-plugins --no-scripts vimeo/psalm psalm/plugin-phpunit"
+            -   name: "Remove sylius/sylius from composer.json"
+                run: "composer remove --no-update --no-plugins --no-scripts sylius/sylius"
             
             -   name: "Install composer dependencies"
                 uses: "ramsey/composer-install@v2"
