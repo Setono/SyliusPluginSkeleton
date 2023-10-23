@@ -145,10 +145,13 @@ jobs:
                     coverage: "none"
                     extensions: "${{ env.PHP_EXTENSIONS }}"
                     php-version: "${{ matrix.php-version }}"
-                    tools: "flex"
+                    tools: "psalm, flex"
 
-            -   name: "Remove sylius/sylius from composer.json"
+            -   name: "Remove require-dev section in composer.json"
                 run: "composer config --unset require-dev"
+                
+            -   name: "Add dev requirements"
+                run: "composer require --no-update --no-plugins --no-scripts psalm/plugin-phpunit"
             
             -   name: "Install composer dependencies"
                 uses: "ramsey/composer-install@v2"
@@ -158,7 +161,7 @@ jobs:
                     dependency-versions: "${{ matrix.dependencies }}"
 
             -   name: "Static analysis"
-                run: "vendor/bin/psalm --php-version=${{ matrix.php-version }}"
+                run: "psalm --php-version=${{ matrix.php-version }}"
 
     unit-tests:
         name: "Unit tests (PHP${{ matrix.php-version }} | Deps: ${{ matrix.dependencies }} | SF${{ matrix.symfony }})"
