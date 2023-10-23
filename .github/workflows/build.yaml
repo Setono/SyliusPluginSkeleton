@@ -150,8 +150,8 @@ jobs:
             -   name: "Remove require-dev section in composer.json"
                 run: "composer config --unset require-dev"
                 
-            -   name: "Add dev requirements"
-                run: "composer require --no-update --no-plugins --no-scripts psalm/plugin-phpunit"
+            -   name: "Add Psalm"
+                run: "composer require --no-update --no-plugins --no-scripts vimeo/psalm psalm/plugin-phpunit"
             
             -   name: "Install composer dependencies"
                 uses: "ramsey/composer-install@v2"
@@ -161,7 +161,7 @@ jobs:
                     dependency-versions: "${{ matrix.dependencies }}"
 
             -   name: "Static analysis"
-                run: "psalm --php-version=${{ matrix.php-version }}"
+                run: "vendor/bin/psalm --php-version=${{ matrix.php-version }}"
 
     unit-tests:
         name: "Unit tests (PHP${{ matrix.php-version }} | Deps: ${{ matrix.dependencies }} | SF${{ matrix.symfony }})"
