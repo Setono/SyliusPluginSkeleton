@@ -147,9 +147,6 @@ jobs:
                     php-version: "${{ matrix.php-version }}"
                     tools: "flex"
 
-            -   name: "Remove require-dev section in composer.json"
-                run: "composer config --unset require-dev"
-                
             -   name: "Remove sylius/sylius from composer.json"
                 run: "composer remove --no-update --no-plugins --no-scripts sylius/sylius"
             
