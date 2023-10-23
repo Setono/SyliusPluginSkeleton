@@ -13,7 +13,7 @@ Enjoy!
 
 ## Quickstart
 
-1. Run `composer create-project --prefer-source --no-install --remove-vcs setono/sylius-plugin-skeleton:dev-master ProjectName` or just click the `Use this template` button at the right corner of this repository.
+1. Run `composer create-project --prefer-source --no-install --remove-vcs setono/sylius-plugin-skeleton:1.12.x-dev ProjectName` or just click the `Use this template` button at the right corner of this repository.
 2. Run `cd ProjectName && composer install`
 3. From the plugin skeleton root directory, run the following commands:
 
@@ -36,7 +36,7 @@ To be able to setup a plugin's database, remember to configure you database cred
 [ico-version]: https://poser.pugx.org/setono/sylius-plugin-skeleton/v/stable
 [ico-license]: https://poser.pugx.org/setono/sylius-plugin-skeleton/license
 [ico-github-actions]: https://github.com/Setono/SyliusPluginSkeleton/workflows/build/badge.svg
-[ico-code-coverage]: https://codecov.io/gh/Setono/SyliusPluginSkeleton/branch/master/graph/badge.svg
+[ico-code-coverage]: https://codecov.io/gh/Setono/SyliusPluginSkeleton/branch/1.12.x/graph/badge.svg
 
 [link-packagist]: https://packagist.org/packages/setono/sylius-plugin-skeleton
 [link-github-actions]: https://github.com/Setono/SyliusPluginSkeleton/actions
