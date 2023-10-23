@@ -249,7 +249,7 @@ jobs:
                     dependency-versions: "${{ matrix.dependencies }}"
 
             -   name: "Lint container"
-                run: '(cd tests/Application && bin/console lint:container)'
+                run: "(cd tests/Application && bin/console lint:container)"
 
             -   name: "Create database"
                 run: "(cd tests/Application && bin/console doctrine:database:create)"
