@@ -19,7 +19,7 @@
         "babdev/pagerfanta-bundle": "^3.8",
         "behat/behat": "^3.12",
         "doctrine/doctrine-bundle": "^2.10",
-        "infection/infection": "^0.26.3",
+        "infection/infection": "^0.27.6",
         "jms/serializer-bundle": "^4.2",
         "lexik/jwt-authentication-bundle": "^2.16",
         "matthiasnoback/symfony-config-test": "^4.3",
