@@ -32,7 +32,7 @@
         "symfony/dotenv": "^5.4 || ^6.0",
         "symfony/intl": "^5.4 || ^6.0",
         "symfony/property-info": "^5.4 || ^6.0",
-        "symfony/serializer": "^5.4 || ^6.3",
+        "symfony/serializer": "^5.4 || ^6.0.1",
         "symfony/web-profiler-bundle": "^5.4 || ^6.0",
         "symfony/webpack-encore-bundle": "^1.16",
         "willdurand/negotiation": "^3.1"
