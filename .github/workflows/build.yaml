@@ -148,7 +148,7 @@ jobs:
                     tools: "flex"
 
             -   name: "Remove sylius/sylius from composer.json"
-                run: "composer remove --no-update --no-plugins --no-scripts sylius/sylius"
+                run: "composer remove --dev --no-update --no-plugins --no-scripts sylius/sylius"
             
             -   name: "Install composer dependencies"
                 uses: "ramsey/composer-install@v2"
