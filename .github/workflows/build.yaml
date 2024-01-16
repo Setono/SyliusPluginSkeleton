@@ -2,7 +2,9 @@ name: "build"
 on:
     push:
         branches:
-            - "*.*.*"
+            - "1.*.x" # Matches our branch versioning that mirrors Sylius', e.g. '1.12.x'
+            - "master"
+            - "main"
         paths-ignore:
             - "**/*.md"
     pull_request:
