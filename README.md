@@ -19,11 +19,11 @@ Enjoy!
     composer create-project --prefer-source --no-install --remove-vcs setono/sylius-plugin-skeleton:1.12.x-dev ProjectName
     ``` 
     or just click the `Use this template` button at the right corner of this repository.
-1. Run
+2. Run
    ```shell
    cd ProjectName && composer install
    ```
-1. From the plugin skeleton root directory, run the following commands:
+3. From the plugin skeleton root directory, run the following commands:
 
     ```bash
     php init
@@ -37,9 +37,9 @@ Enjoy!
     (cd tests/Application && bin/console sylius:fixtures:load -n)
     ```
    
-1. Start your local PHP server: `symfony serve` (see https://symfony.com/doc/current/setup/symfony_server.html for docs)
+4. Start your local PHP server: `symfony serve` (see https://symfony.com/doc/current/setup/symfony_server.html for docs)
 
-To be able to setup a plugin's database, remember to configure you database credentials in `tests/Application/.env` and `tests/Application/.env.test`.
+To be able to set up a plugin's database, remember to configure you database credentials in `tests/Application/.env` and `tests/Application/.env.test`.
 
 [ico-version]: https://poser.pugx.org/setono/sylius-plugin-skeleton/v/stable
 [ico-license]: https://poser.pugx.org/setono/sylius-plugin-skeleton/license
