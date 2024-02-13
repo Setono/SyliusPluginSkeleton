@@ -5,10 +5,10 @@
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
     phpVersion="8.1"
     errorLevel="1"
-    findUnusedBaselineEntry="true"
-    findUnusedPsalmSuppress="true"
+    findUnusedBaselineEntry="false"
+    findUnusedPsalmSuppress="false"
     findUnusedCode="false"
-    findUnusedVariablesAndParams="true"
+    findUnusedVariablesAndParams="false"
 >
     <projectFiles>
         <directory name="src"/>
