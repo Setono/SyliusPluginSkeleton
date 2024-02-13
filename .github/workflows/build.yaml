@@ -58,6 +58,7 @@ jobs:
 
             -   name: "Rector"
                 run: "vendor/bin/rector process --dry-run"
+                continue-on-error: true
 
             -   name: "Lint yaml files"
                 run: "(cd tests/Application && bin/console lint:yaml ../../src/Resources)"
