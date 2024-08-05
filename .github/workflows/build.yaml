@@ -95,10 +95,13 @@ jobs:
                     coverage: "none"
                     extensions: "${{ env.PHP_EXTENSIONS }}"
                     php-version: "${{ matrix.php-version }}"
-                    tools: "composer-require-checker, composer-unused, flex"
+                    tools: "flex"
 
             -   name: "Remove require-dev section in composer.json"
                 run: "composer config --unset require-dev"
+                
+            -   name: "Add shipmonk/composer-dependency-analyser to composer.json"
+                run: "composer require --dev --no-install --no-plugins --no-scripts shipmonk/composer-dependency-analyser"
             
             -   name: "Install composer dependencies"
                 uses: "ramsey/composer-install@v3"
@@ -107,11 +110,8 @@ jobs:
                 with:
                     dependency-versions: "${{ matrix.dependencies }}"
 
-            -   name: "Run maglnet/composer-require-checker"
-                run: "composer-require-checker check"
-
-            -   name: "Run composer-unused/composer-unused"
-                run: "composer-unused"
+            -   name: "Run dependency analysis"
+                run: "vendor/bin/composer-dependency-analyser"
     
     static-code-analysis:
         name: "Static Code Analysis (PHP${{ matrix.php-version }} | Deps: ${{ matrix.dependencies }} | SF${{ matrix.symfony }})"

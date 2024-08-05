@@ -27,6 +27,7 @@
         "phpunit/phpunit": "^9.6.17",
         "psalm/plugin-phpunit": "^0.18.4",
         "setono/code-quality-pack": "^2.7",
+        "shipmonk/composer-dependency-analyser": "^1.6",
         "sylius/sylius": "~1.12.13",
         "symfony/debug-bundle": "^5.4 || ^6.4 || ^7.0",
         "symfony/dotenv": "^5.4 || ^6.4 || ^7.0",
