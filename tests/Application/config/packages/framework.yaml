@@ -1,9 +1,7 @@
 framework:
     secret: '%env(APP_SECRET)%'
-    ide: phpstorm
-    form:
-        enabled: true
-        legacy_error_messages: false
+    ide: 'phpstorm'
+    form: true
     csrf_protection: true
     session:
         handler_id: ~

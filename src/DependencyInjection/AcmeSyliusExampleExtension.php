@@ -11,17 +11,12 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
 final class AcmeSyliusExampleExtension extends Extension
 {
+    #[\Override]
     public function load(array $configs, ContainerBuilder $container): void
     {
-        /**
-         * @psalm-suppress PossiblyNullArgument
-         *
-         * @var array{option: scalar} $config
-         */
+        /** @psalm-suppress PossiblyNullArgument */
         $config = $this->processConfiguration($this->getConfiguration([], $container), $configs);
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
-
-        $container->setParameter('acme_sylius_example.option', $config['option']);
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../../config'));
 
         $loader->load('services.xml');
     }
