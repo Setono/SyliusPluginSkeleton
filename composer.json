@@ -10,9 +10,9 @@
     "require": {
         "php": ">=8.2",
         "sylius/core-bundle": "^2.0",
-        "symfony/config": "^6.4 || ^7.0",
-        "symfony/dependency-injection": "^6.4 || ^7.0",
-        "symfony/http-kernel": "^6.4 || ^7.0"
+        "symfony/config": "^6.4 || ^7.2",
+        "symfony/dependency-injection": "^6.4 || ^7.2",
+        "symfony/http-kernel": "^6.4 || ^7.2"
     },
     "require-dev": {
         "infection/infection": "^0.29.14",
@@ -21,12 +21,12 @@
         "setono/code-quality-pack": "^2.10",
         "shipmonk/composer-dependency-analyser": "^1.8.2",
         "sylius/sylius": "~2.0.7",
-        "symfony/debug-bundle": "^6.4 || ^7.0",
-        "symfony/dotenv": "^6.4 || ^7.0",
-        "symfony/intl": "^6.4 || ^7.0",
-        "symfony/property-info": "^6.4 || ^7.0",
-        "symfony/serializer": "^6.4 || ^7.0",
-        "symfony/web-profiler-bundle": "^6.4 || ^7.0",
+        "symfony/debug-bundle": "^6.4 || ^7.2",
+        "symfony/dotenv": "^6.4 || ^7.2",
+        "symfony/intl": "^6.4 || ^7.2",
+        "symfony/property-info": "^6.4 || ^7.2",
+        "symfony/serializer": "^6.4 || ^7.2",
+        "symfony/web-profiler-bundle": "^6.4 || ^7.2",
         "symfony/webpack-encore-bundle": "^2.2"
     },
     "prefer-stable": true,
