@@ -15,6 +15,7 @@
         "symfony/http-kernel": "^6.4 || ^7.2"
     },
     "require-dev": {
+        "api-platform/symfony": "^4.1.8",
         "infection/infection": "^0.29.14",
         "payum/core": "^1.7.5",
         "phpunit/phpunit": "^10.5.46",
