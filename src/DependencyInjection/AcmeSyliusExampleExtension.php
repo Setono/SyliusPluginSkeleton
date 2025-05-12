@@ -11,7 +11,6 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
 final class AcmeSyliusExampleExtension extends Extension
 {
-    #[\Override]
     public function load(array $configs, ContainerBuilder $container): void
     {
         /** @psalm-suppress PossiblyNullArgument */
