@@ -60,7 +60,7 @@ jobs:
                 run: "vendor/bin/rector process --dry-run"
 
             -   name: "Lint yaml files"
-                run: "(cd tests/Application && bin/console lint:yaml ../.."
+                run: "(cd tests/Application && bin/console lint:yaml ../../.github ../../config ../../translations"
 
             -   name: "Lint twig files"
                 run: "(cd tests/Application && bin/console lint:twig ../../templates)"
