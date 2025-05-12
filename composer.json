@@ -16,6 +16,7 @@
     },
     "require-dev": {
         "infection/infection": "^0.29.14",
+        "payum/core": "^1.7.5",
         "phpunit/phpunit": "^10.5.46",
         "psalm/plugin-phpunit": "^0.19.5",
         "setono/code-quality-pack": "^2.10",
