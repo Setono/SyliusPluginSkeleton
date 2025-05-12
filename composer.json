@@ -17,6 +17,7 @@
     "require-dev": {
         "api-platform/symfony": "^4.1.8",
         "infection/infection": "^0.29.14",
+        "matthiasnoback/symfony-dependency-injection-test": "^6.1",
         "payum/core": "^1.7.5",
         "phpunit/phpunit": "^10.5.46",
         "psalm/plugin-phpunit": "^0.19.5",
