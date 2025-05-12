@@ -7,7 +7,7 @@
 [![Mutation testing][ico-infection]][link-infection]
 
 [Setono](https://setono.com) have made a bunch of [plugins for Sylius](https://github.com/Setono?q=plugin&sort=stargazers), and we have some guidelines
-which we try to follow when developing plugins. These guidelines are used in this repository, and it gives you a very
+that we try to follow when developing plugins. These guidelines are used in this repository, and it gives you a very
 solid base when developing plugins.
 
 Enjoy! 
@@ -16,7 +16,7 @@ Enjoy!
 
 1. Run
     ```shell
-    composer create-project --prefer-source --no-install --remove-vcs setono/sylius-plugin-skeleton:1.12.x-dev ProjectName
+    composer create-project --prefer-source --no-install --remove-vcs setono/sylius-plugin-skeleton:2.0.x-dev ProjectName
     ``` 
     or just click the `Use this template` button at the right corner of this repository.
 2. Run
