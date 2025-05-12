@@ -44,10 +44,10 @@ To be able to set up a plugin's database, remember to configure you database cre
 [ico-version]: https://poser.pugx.org/setono/sylius-plugin-skeleton/v/stable
 [ico-license]: https://poser.pugx.org/setono/sylius-plugin-skeleton/license
 [ico-github-actions]: https://github.com/Setono/SyliusPluginSkeleton/workflows/build/badge.svg
-[ico-code-coverage]: https://codecov.io/gh/Setono/SyliusPluginSkeleton/branch/1.12.x/graph/badge.svg
-[ico-infection]: https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2FSetono%2FSyliusPluginSkeleton%2F1.12.x
+[ico-code-coverage]: https://codecov.io/gh/Setono/SyliusPluginSkeleton/branch/2.0.x/graph/badge.svg
+[ico-infection]: https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2FSetono%2FSyliusPluginSkeleton%2F2.0.x
 
 [link-packagist]: https://packagist.org/packages/setono/sylius-plugin-skeleton
 [link-github-actions]: https://github.com/Setono/SyliusPluginSkeleton/actions
 [link-code-coverage]: https://codecov.io/gh/Setono/SyliusPluginSkeleton
-[link-infection]: https://dashboard.stryker-mutator.io/reports/github.com/Setono/SyliusPluginSkeleton/1.12.x
+[link-infection]: https://dashboard.stryker-mutator.io/reports/github.com/Setono/SyliusPluginSkeleton/2.0.x
