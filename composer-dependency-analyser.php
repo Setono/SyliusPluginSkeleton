@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 use ShipMonk\ComposerDependencyAnalyser\Config\Configuration;
 
 return (new Configuration())
     ->addPathToExclude(__DIR__ . '/tests')
     ->ignoreUnknownClasses([
-        \Override::class
+        \Override::class,
     ])
 ;
