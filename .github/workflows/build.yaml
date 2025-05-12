@@ -2,7 +2,7 @@ name: "build"
 on:
     push:
         branches:
-            - "1.*.x" # Matches our branch versioning that mirrors Sylius', e.g. '1.12.x'
+            - "2.*.x" # Matches our branch versioning that mirrors Sylius', e.g. '2.0.x'
             - "master"
             - "main"
         paths-ignore:
@@ -26,7 +26,7 @@ jobs:
         strategy:
             matrix:
                 php-version:
-                    - "8.1" # Always use the lowest version of PHP since a higher version could create actual syntax errors in lower versions
+                    - "8.2" # Always use the lowest version of PHP since a higher version could create actual syntax errors in lower versions
 
                 dependencies:
                     - "highest"
@@ -74,7 +74,6 @@ jobs:
         strategy:
             matrix:
                 php-version:
-                    - "8.1"
                     - "8.2"
                     - "8.3"
 
@@ -85,6 +84,7 @@ jobs:
                 symfony:
                     - "~5.4.0"
                     - "~6.4.0"
+                    - "~7.0.0"
 
         steps:
             -   name: "Checkout"
@@ -122,7 +122,6 @@ jobs:
         strategy:
             matrix:
                 php-version:
-                    - "8.1"
                     - "8.2"
                     - "8.3"
 
@@ -133,6 +132,7 @@ jobs:
                 symfony:
                     - "~5.4.0"
                     - "~6.4.0"
+                    - "~7.0.0"
 
         steps:
             -   name: "Checkout"
@@ -167,7 +167,6 @@ jobs:
         strategy:
             matrix:
                 php-version:
-                    - "8.1"
                     - "8.2"
                     - "8.3"
                 
@@ -178,6 +177,7 @@ jobs:
                 symfony:
                     - "~5.4.0"
                     - "~6.4.0"
+                    - "~7.0.0"
 
         steps:
             -   name: "Checkout"
@@ -209,7 +209,6 @@ jobs:
         strategy:
             matrix:
                 php-version:
-                    - "8.1"
                     - "8.2"
                     - "8.3"
 
@@ -220,6 +219,7 @@ jobs:
                 symfony:
                     - "~5.4.0"
                     - "~6.4.0"
+                    - "~7.0.0"
 
         steps:
             -   name: "Start MySQL"
