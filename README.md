@@ -16,7 +16,7 @@ Enjoy!
 
 1. Run
     ```shell
-    composer create-project --prefer-source --no-install --remove-vcs setono/sylius-plugin-skeleton:1.12.x-dev ProjectName
+    composer create-project --prefer-source --no-install --remove-vcs setono/sylius-plugin-skeleton:1.14.x-dev ProjectName
     ``` 
     or just click the `Use this template` button at the right corner of this repository.
 2. Run

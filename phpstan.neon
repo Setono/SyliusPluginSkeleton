@@ -1,0 +1,25 @@
+parameters:
+    level: max
+
+    paths:
+        - src
+        - tests
+
+    excludePaths:
+        - tests/Application/*
+        - src/DependencyInjection/Configuration.php
+
+    bootstrapFiles:
+        - vendor/autoload.php
+
+    # Symfony Configuration
+    symfony:
+        consoleApplicationLoader: tests/PHPStan/console_application.php
+
+    # Doctrine Configuration
+    doctrine:
+        repositoryClass: Doctrine\ORM\EntityRepository
+        objectManagerLoader: tests/PHPStan/object_manager.php
+
+    reportUnmatchedIgnoredErrors: false
+    treatPhpDocTypesAsCertain: false
