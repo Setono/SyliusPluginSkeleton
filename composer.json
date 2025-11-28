@@ -54,6 +54,9 @@
             "phpstan/extension-installer": true,
             "symfony/thanks": false
         },
+        "audit": {
+            "block-insecure": false
+        },
         "sort-packages": true
     },
     "scripts": {
