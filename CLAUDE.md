@@ -82,10 +82,10 @@ The plugin provides multilingual support through translation files in `src/Resou
 
 - **Translation Files**: Available in 10 languages (en, da, de, es, fr, it, nl, no, pl, sv)
 - **Translation Domains**:
-  - `messages.*` - General UI translations (form labels, navigation terms)
+  - `messages.*` - General UI translations
   - `flashes.*` - Flash message translations (success/error messages)
 
 Key translation keys:
-- `acme_sylius_example.ui.*` - UI labels and navigation terms
+- `acme_sylius_example.ui.*` - UI labels
 - `acme_sylius_example.form.*` - Form field labels
 - `acme_sylius_example.single_message` - A flash message
