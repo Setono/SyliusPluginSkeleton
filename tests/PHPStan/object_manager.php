@@ -9,4 +9,5 @@ require __DIR__ . '/../../vendor/autoload.php';
 $kernel = new Kernel('test', true);
 $kernel->boot();
 
+/** @phpstan-ignore method.notFound */
 return $kernel->getContainer()->get('doctrine')->getManager();
