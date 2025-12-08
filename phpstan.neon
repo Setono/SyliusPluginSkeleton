@@ -7,7 +7,6 @@ parameters:
 
     excludePaths:
         - tests/Application/*
-        - src/DependencyInjection/Configuration.php
 
     bootstrapFiles:
         - vendor/autoload.php
