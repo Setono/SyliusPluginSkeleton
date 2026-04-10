@@ -33,7 +33,7 @@ jobs:
 
         steps:
             -   name: "Checkout"
-                uses: "actions/checkout@v4"
+                uses: "actions/checkout@v6"
 
             -   name: "Setup PHP, with composer and extensions"
                 uses: "shivammathur/setup-php@v2"
@@ -43,7 +43,7 @@ jobs:
                     coverage: "none"
 
             -   name: "Install composer dependencies"
-                uses: "ramsey/composer-install@v3"
+                uses: "ramsey/composer-install@v4"
                 with:
                     dependency-versions: "${{ matrix.dependencies }}"
 
@@ -82,11 +82,11 @@ jobs:
                 
                 symfony:
                     - "~6.4.0"
-                    - "~7.2.0"
+                    - "~7.4.0"
 
         steps:
             -   name: "Checkout"
-                uses: "actions/checkout@v4"
+                uses: "actions/checkout@v6"
 
             -   name: "Setup PHP, with composer and extensions"
                 uses: "shivammathur/setup-php@v2"
@@ -103,7 +103,7 @@ jobs:
                 run: "composer require --dev --no-install --no-update --no-plugins --no-scripts shipmonk/composer-dependency-analyser"
             
             -   name: "Install composer dependencies"
-                uses: "ramsey/composer-install@v3"
+                uses: "ramsey/composer-install@v4"
                 env:
                     SYMFONY_REQUIRE: "${{ matrix.symfony }}"
                 with:
@@ -129,11 +129,11 @@ jobs:
 
                 symfony:
                     - "~6.4.0"
-                    - "~7.2.0"
+                    - "~7.4.0"
 
         steps:
             -   name: "Checkout"
-                uses: "actions/checkout@v4"
+                uses: "actions/checkout@v6"
 
             -   name: "Setup PHP, with composer and extensions"
                 uses: "shivammathur/setup-php@v2"
@@ -147,14 +147,14 @@ jobs:
                 run: "composer remove --dev --no-install --no-update --no-plugins --no-scripts sylius/sylius"
             
             -   name: "Install composer dependencies"
-                uses: "ramsey/composer-install@v3"
+                uses: "ramsey/composer-install@v4"
                 env:
                     SYMFONY_REQUIRE: "${{ matrix.symfony }}"
                 with:
                     dependency-versions: "${{ matrix.dependencies }}"
 
             -   name: "Static analysis"
-                run: "vendor/bin/psalm --php-version=${{ matrix.php-version }}"
+                run: "composer analyse"
 
     unit-tests:
         name: "Unit tests (PHP${{ matrix.php-version }} | Deps: ${{ matrix.dependencies }} | SF${{ matrix.symfony }})"
@@ -173,11 +173,11 @@ jobs:
 
                 symfony:
                     - "~6.4.0"
-                    - "~7.2.0"
+                    - "~7.4.0"
 
         steps:
             -   name: "Checkout"
-                uses: "actions/checkout@v4"
+                uses: "actions/checkout@v6"
 
             -   name: "Setup PHP, with composer and extensions"
                 uses: "shivammathur/setup-php@v2"
@@ -188,7 +188,7 @@ jobs:
                     tools: "flex"
 
             -   name: "Install composer dependencies"
-                uses: "ramsey/composer-install@v3"
+                uses: "ramsey/composer-install@v4"
                 env:
                     SYMFONY_REQUIRE: "${{ matrix.symfony }}"
                 with:
@@ -214,14 +214,14 @@ jobs:
                 
                 symfony:
                     - "~6.4.0"
-                    - "~7.2.0"
+                    - "~7.4.0"
 
         steps:
             -   name: "Start MySQL"
                 run: "sudo /etc/init.d/mysql start"
 
             -   name: "Checkout"
-                uses: "actions/checkout@v4"
+                uses: "actions/checkout@v6"
 
             -   name: "Setup PHP, with composer and extensions"
                 uses: "shivammathur/setup-php@v2"
@@ -232,7 +232,7 @@ jobs:
                     tools: "flex"
 
             -   name: "Install composer dependencies"
-                uses: "ramsey/composer-install@v3"
+                uses: "ramsey/composer-install@v4"
                 env:
                     SYMFONY_REQUIRE: "${{ matrix.symfony }}"
                 with:
@@ -265,7 +265,7 @@ jobs:
 
         steps:
             -   name: "Checkout"
-                uses: "actions/checkout@v4"
+                uses: "actions/checkout@v6"
 
             -   name: "Setup PHP, with composer and extensions"
                 uses: "shivammathur/setup-php@v2"
@@ -275,7 +275,7 @@ jobs:
                     php-version: "${{ matrix.php-version }}"
 
             -   name: "Install composer dependencies"
-                uses: "ramsey/composer-install@v3"
+                uses: "ramsey/composer-install@v4"
                 with:
                     dependency-versions: "${{ matrix.dependencies }}"
 
@@ -299,7 +299,7 @@ jobs:
 
         steps:
             -   name: "Checkout"
-                uses: "actions/checkout@v4"
+                uses: "actions/checkout@v6"
 
             -   name: "Setup PHP, with composer and extensions"
                 uses: "shivammathur/setup-php@v2"
@@ -309,7 +309,7 @@ jobs:
                     php-version: "${{ matrix.php-version }}"
 
             -   name: "Install composer dependencies"
-                uses: "ramsey/composer-install@v3"
+                uses: "ramsey/composer-install@v4"
                 with:
                     dependency-versions: "${{ matrix.dependencies }}"
 

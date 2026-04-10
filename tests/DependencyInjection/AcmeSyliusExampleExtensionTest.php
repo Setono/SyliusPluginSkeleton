@@ -6,6 +6,7 @@ namespace Acme\SyliusExamplePlugin\Tests\DependencyInjection;
 
 use Acme\SyliusExamplePlugin\DependencyInjection\AcmeSyliusExampleExtension;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 final class AcmeSyliusExampleExtensionTest extends AbstractExtensionTestCase
 {
@@ -16,13 +17,11 @@ final class AcmeSyliusExampleExtensionTest extends AbstractExtensionTestCase
         ];
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_loads(): void
     {
-        $this->load();
+        $this->expectNotToPerformAssertions();
 
-        self::assertTrue(true);
+        $this->load();
     }
 }

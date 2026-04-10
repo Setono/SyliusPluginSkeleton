@@ -10,26 +10,22 @@
     "require": {
         "php": ">=8.2",
         "sylius/core-bundle": "^2.2",
-        "symfony/config": "^6.4 || ^7.2",
-        "symfony/dependency-injection": "^6.4 || ^7.2",
-        "symfony/http-kernel": "^6.4 || ^7.2"
+        "symfony/config": "^6.4 || ^7.4",
+        "symfony/dependency-injection": "^6.4 || ^7.4",
+        "symfony/http-kernel": "^6.4 || ^7.4"
     },
     "require-dev": {
         "api-platform/symfony": "^4.1.8",
-        "infection/infection": "^0.29.14",
-        "matthiasnoback/symfony-dependency-injection-test": "^6.1",
         "payum/core": "^1.7.5",
-        "phpunit/phpunit": "^10.5.46",
-        "psalm/plugin-phpunit": "^0.19.5",
-        "setono/code-quality-pack": "^2.10",
+        "setono/sylius-plugin-pack": "~2.2.0",
         "shipmonk/composer-dependency-analyser": "^1.8.2",
         "sylius/sylius": "~2.2.0",
-        "symfony/debug-bundle": "^6.4 || ^7.2",
-        "symfony/dotenv": "^6.4 || ^7.2",
-        "symfony/intl": "^6.4 || ^7.2",
-        "symfony/property-info": "^6.4 || ^7.2",
-        "symfony/serializer": "^6.4 || ^7.2",
-        "symfony/web-profiler-bundle": "^6.4 || ^7.2",
+        "symfony/debug-bundle": "^6.4 || ^7.4",
+        "symfony/dotenv": "^6.4 || ^7.4",
+        "symfony/intl": "^6.4 || ^7.4",
+        "symfony/property-info": "^6.4 || ^7.4",
+        "symfony/serializer": "^6.4 || ^7.4",
+        "symfony/web-profiler-bundle": "^6.4 || ^7.4",
         "symfony/webpack-encore-bundle": "^2.2"
     },
     "prefer-stable": true,
@@ -51,13 +47,14 @@
             "dealerdirect/phpcodesniffer-composer-installer": false,
             "ergebnis/composer-normalize": true,
             "infection/extension-installer": true,
+            "phpstan/extension-installer": true,
             "php-http/discovery": false,
             "symfony/thanks": false
         },
         "sort-packages": true
     },
     "scripts": {
-        "analyse": "psalm",
+        "analyse": "phpstan analyse",
         "check-style": "ecs check",
         "fix-style": "ecs check --fix",
         "phpunit": "phpunit"

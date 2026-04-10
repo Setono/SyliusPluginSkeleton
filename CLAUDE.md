@@ -18,7 +18,7 @@ vendor/bin/phpunit tests/path/ToTest.php  # run a single test file
 vendor/bin/phpunit --filter testMethodName # run a single test method
 
 # Static analysis
-composer analyse                          # Psalm (errorLevel 1)
+composer analyse                          # PHPStan (level max)
 
 # Coding standards
 composer check-style                      # ECS check (sylius-labs/coding-standard)
@@ -52,8 +52,7 @@ This is a Symfony Bundle structured as a Sylius plugin:
 - Full type declarations on properties, parameters, and return types
 - Style enforced by ECS using `sylius-labs/coding-standard`
 - Rector enforces PHP 8.2 level modernization
-- Forbidden functions (via Psalm): `dd`, `dump`, `exit`, `var_dump`, `print_r`
-- Psalm runs at errorLevel 1 (strictest)
+- PHPStan runs at level max with Symfony and Doctrine integration
 - Bundle naming follows `{Vendor}Sylius{Name}Plugin` convention
 - DI extension alias uses snake_case (e.g., `acme_sylius_example`)
 
