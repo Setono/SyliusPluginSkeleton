@@ -9,7 +9,7 @@ parameters:
         - tests/Application/*
 
     bootstrapFiles:
-        - vendor/autoload.php
+        - tests/Application/config/bootstrap.php
 
     # Symfony Configuration
     symfony:
