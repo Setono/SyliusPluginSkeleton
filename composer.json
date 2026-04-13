@@ -16,6 +16,7 @@
     },
     "require-dev": {
         "api-platform/symfony": "^4.3.3",
+        "api-platform/serializer": "^4.3.3",
         "payum/core": "^1.7.5",
         "setono/sylius-plugin-pack": "~2.2.0",
         "sylius/grid-bundle": "^1.15",
