@@ -17,8 +17,8 @@
     "require-dev": {
         "api-platform/symfony": "^4.1.8",
         "payum/core": "^1.7.5",
-        "sylius/grid-bundle": "^1.15",
         "setono/sylius-plugin-pack": "~2.2.0",
+        "sylius/grid-bundle": "^1.15",
         "sylius/sylius": "~2.2.5",
         "symfony/debug-bundle": "^6.4 || ^7.4",
         "symfony/dotenv": "^6.4 || ^7.4",
