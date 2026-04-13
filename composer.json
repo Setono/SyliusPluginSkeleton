@@ -15,7 +15,6 @@
         "symfony/http-kernel": "^6.4 || ^7.4"
     },
     "require-dev": {
-        "api-platform/serializer": "^4.3.3",
         "api-platform/symfony": "^4.3.3",
         "payum/core": "^1.7.5",
         "setono/sylius-plugin-pack": "~2.2.0",
