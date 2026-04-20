@@ -6,6 +6,12 @@ on:
     workflow_dispatch: ~
 
 jobs:
+    backwards-compatibility:
+        runs-on: "ubuntu-latest"
+        if: "github.event_name == 'pull_request'"
+        steps:
+            -   uses: "setono/sylius-plugin/backwards-compatibility@v2"
+    
     coding-standards:
         runs-on: "ubuntu-latest"
         steps:
