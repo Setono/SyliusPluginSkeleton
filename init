@@ -6,7 +6,9 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
@@ -14,22 +16,26 @@ use Symfony\Component\Process\Process;
 (new Application('init', '1.0.0'))
     ->register('init')
     ->setCode(function(InputInterface $input, OutputInterface $output) {
+        $io = new SymfonyStyle($input, $output);
         $questionHelper = new QuestionHelper();
-        $finder = new Finder();
 
-        $vendor = $questionHelper->ask($input, $output, new Question('What is your plugin namespace (usually this is your organization name)? '));
+        $io->title('Sylius Plugin Skeleton — Initialization');
+        $io->text([
+            'This script renames the Acme/Example placeholders throughout the project',
+            'to your vendor and plugin names. You will be asked a few questions, shown',
+            'a preview of the changes, and asked to confirm before anything is written.',
+        ]);
+        $io->newLine();
 
-        $q = new Question('What is your plugin name? ');
-        $q->setValidator(static function (mixed $answer): string {
-            if (!is_string($answer)) {
-                throw new \RuntimeException(
-                    'Please enter the plugin name.'
-                );
-            }
+        $vendor = $questionHelper->ask($input, $output, makePascalCaseQuestion(
+            'Vendor name (e.g. "Acme", "Setono"): ',
+            'vendor name'
+        ));
 
-            return $answer;
-        });
-        $pluginName = $questionHelper->ask($input, $output, $q);
+        $pluginName = $questionHelper->ask($input, $output, makePascalCaseQuestion(
+            'Plugin name (e.g. "SyliusAnalyticsPlugin", "SyliusMeilisearchPlugin"): ',
+            'plugin name'
+        ));
 
         if (str_ends_with($pluginName, 'Plugin')) {
             $pluginName = substr($pluginName, 0, -6);
@@ -37,31 +43,87 @@ use Symfony\Component\Process\Process;
 
         $pluginNameWithSuffix = $pluginName . 'Plugin';
 
+        $githubOrgQuestion = new Question(sprintf('GitHub organization [%s]: ', $vendor), $vendor);
+        $githubOrgQuestion->setValidator(static function (mixed $answer): string {
+            if (!is_string($answer) || $answer === '') {
+                throw new \RuntimeException('Please enter a GitHub organization.');
+            }
+            if (!preg_match('/^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$/', $answer)) {
+                throw new \RuntimeException('GitHub organization must contain only letters, digits and hyphens (no leading/trailing hyphen).');
+            }
+            return $answer;
+        });
+        $githubOrg = $questionHelper->ask($input, $output, $githubOrgQuestion);
+
+        $defaultGithubRepo = strtolower($githubOrg) . '/' . str_replace('_', '-', Container::underscore($pluginNameWithSuffix));
+        $githubRepoQuestion = new Question(sprintf('GitHub repository [%s]: ', $defaultGithubRepo), $defaultGithubRepo);
+        $githubRepoQuestion->setValidator(static function (mixed $answer): string {
+            if (!is_string($answer) || $answer === '') {
+                throw new \RuntimeException('Please enter a GitHub repository.');
+            }
+            if (!preg_match('#^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?/[A-Za-z0-9._-]+$#', $answer)) {
+                throw new \RuntimeException('GitHub repository must be in the form "org/repo".');
+            }
+            return $answer;
+        });
+        $githubRepo = $questionHelper->ask($input, $output, $githubRepoQuestion);
+
+        $branchQuestion = new Question('Initial branch [master]: ', 'master');
+        $branchQuestion->setValidator(static function (mixed $answer): string {
+            if (!is_string($answer) || $answer === '') {
+                throw new \RuntimeException('Please enter a branch name.');
+            }
+            if (!preg_match('#^[A-Za-z0-9._/-]+$#', $answer)) {
+                throw new \RuntimeException('Branch must contain only letters, digits, dots, dashes, underscores and slashes.');
+            }
+            return $answer;
+        });
+        $branch = $questionHelper->ask($input, $output, $branchQuestion);
+
         $yamlNamespace = Container::underscore($vendor) . '_' . Container::underscore($pluginName);
-
         $composerName = str_replace('_', '-', Container::underscore($vendor)) . '/' . str_replace('_', '-', Container::underscore($pluginNameWithSuffix));
+        $phpNamespace = $vendor . '\\' . $pluginNameWithSuffix;
 
-        $finder
+        $io->section('Summary');
+        $io->definitionList(
+            ['Vendor' => $vendor],
+            ['Plugin' => $pluginNameWithSuffix],
+            ['GitHub organization' => $githubOrg],
+            ['GitHub repository' => $githubRepo],
+            ['Branch' => $branch],
+            ['PHP namespace' => $phpNamespace],
+            ['YAML namespace' => $yamlNamespace],
+            ['Composer package' => $composerName],
+        );
+
+        if (!$questionHelper->ask($input, $output, new ConfirmationQuestion('Apply these changes? [Y/n] ', true))) {
+            $io->warning('Aborted. No changes were made.');
+            return 1;
+        }
+
+        $io->section('Applying changes');
+
+        $io->text('Updating file contents…');
+        $finder = (new Finder())
             ->in('.')
             ->exclude(['vendor', 'node_modules', '.github', '.idea'])
             ->ignoreVCSIgnored(true)
             ->ignoreVCS(true)
             ->contains('/acme/i')
             ->ignoreDotFiles(false)
-            ->notName('init') // this file
+            ->notName('init')
         ;
 
         foreach ($finder as $file) {
             replaceInFile($file->getPathname(), [
                 'acme_sylius_example' => $yamlNamespace,
-                'Acme\\SyliusExamplePlugin' => $vendor . '\\' . $pluginNameWithSuffix,
+                'Acme\\SyliusExamplePlugin' => $phpNamespace,
                 'AcmeSyliusExamplePlugin' => $vendor.$pluginNameWithSuffix,
                 'AcmeSyliusExample' => $vendor.$pluginName,
                 'Acme' => $vendor,
                 'SyliusExamplePlugin' => $pluginNameWithSuffix,
             ]);
         }
-
 
         replaceInFile('composer.json', [
             'setono/sylius-plugin-skeleton' => $composerName,
@@ -70,23 +132,108 @@ use Symfony\Component\Process\Process;
 
         replaceInFile('README.md', [
             'Setono Sylius Plugin Skeleton' => $vendor . ' ' . $pluginNameWithSuffix,
-            'Setono/SyliusPluginSkeleton' => $vendor . '/' . $pluginNameWithSuffix,
+            'Setono/SyliusPluginSkeleton' => $githubRepo,
             'setono/sylius-plugin-skeleton' => $composerName,
+            '2.2.x' => $branch,
         ]);
 
+        replaceInFile('infection.json5', ['2.2.x' => $branch]);
+
+        $io->text('Renaming classes and config files…');
         rename('src/DependencyInjection/AcmeSyliusExampleExtension.php', sprintf('src/DependencyInjection/%s%sExtension.php', $vendor, $pluginName));
         rename('src/AcmeSyliusExamplePlugin.php', sprintf('src/%s%s.php', $vendor, $pluginNameWithSuffix));
         rename('tests/DependencyInjection/AcmeSyliusExampleExtensionTest.php', sprintf('tests/DependencyInjection/%s%sExtensionTest.php', $vendor, $pluginName));
-        rename('tests/Application/config/packages/acme_sylius_example.yaml', sprintf('tests/Application/config/packages/%s.yaml', $yamlNamespace));
-        rename('tests/Application/config/routes/acme_sylius_example.yaml', sprintf('tests/Application/config/routes/%s.yaml', $yamlNamespace));
 
+        if (file_exists('tests/Application/config/packages/acme_sylius_example.yaml')) {
+            rename('tests/Application/config/packages/acme_sylius_example.yaml', sprintf('tests/Application/config/packages/%s.yaml', $yamlNamespace));
+        }
+        if (file_exists('tests/Application/config/routes/acme_sylius_example.yaml')) {
+            rename('tests/Application/config/routes/acme_sylius_example.yaml', sprintf('tests/Application/config/routes/%s.yaml', $yamlNamespace));
+        }
+
+        $io->text('Regenerating autoloader...');
         $process = new Process(['composer', 'dump-autoload']);
         $process->run();
+        if (!$process->isSuccessful()) {
+            $io->error('composer dump-autoload failed:');
+            $output->writeln($process->getErrorOutput() ?: $process->getOutput());
+            return 1;
+        }
+
+        $io->success(sprintf('%s scaffolded successfully.', $pluginNameWithSuffix));
+
+        $setupCommands = [
+            'Installing frontend dependencies' => ['yarn', 'install'],
+            'Building frontend assets'         => ['yarn', 'build'],
+            'Installing Symfony assets'        => ['php', 'bin/console', 'assets:install'],
+            'Creating database'                => ['php', 'bin/console', 'doctrine:database:create', '--if-not-exists'],
+            'Creating database schema'         => ['php', 'bin/console', 'doctrine:schema:create'],
+            'Loading fixtures'                 => ['php', 'bin/console', 'sylius:fixtures:load', '-n'],
+        ];
+
+        if ($questionHelper->ask($input, $output, new ConfirmationQuestion('Run setup commands now (yarn install, asset install, database setup)? [Y/n] ', true))) {
+            $io->section('Running setup');
+            $io->note('Database commands require credentials in tests/Application/.env(.test). Failures will be reported but the script will continue.');
+
+            $failures = [];
+            foreach ($setupCommands as $label => $command) {
+                $io->text(sprintf('▸ %s', $label));
+                $process = new Process($command, 'tests/Application');
+                $process->setTimeout(null);
+                $process->run(static function (string $type, string $buffer) use ($output): void {
+                    $output->write($buffer);
+                });
+                if (!$process->isSuccessful()) {
+                    $failures[] = $label;
+                    $io->warning(sprintf('"%s" failed.', $label));
+                }
+            }
+
+            if ($failures !== []) {
+                $io->warning(sprintf('%d setup step(s) failed: %s. You can re-run them manually.', count($failures), implode(', ', $failures)));
+            } else {
+                $io->success('Setup complete.');
+            }
+        } else {
+            $io->section('Next steps');
+            $io->listing([
+                '(cd tests/Application && yarn install && yarn build)',
+                '(cd tests/Application && bin/console assets:install)',
+                '(cd tests/Application && bin/console doctrine:database:create --if-not-exists)',
+                '(cd tests/Application && bin/console doctrine:schema:create)',
+                '(cd tests/Application && bin/console sylius:fixtures:load -n)',
+            ]);
+        }
+
+        $io->text('When you are ready, start the local server with: symfony serve');
+
+        if ($questionHelper->ask($input, $output, new ConfirmationQuestion('Delete this init script now? [Y/n] ', true))) {
+            @unlink(__FILE__);
+            $io->text('init script removed.');
+        }
+
+        return 0;
     })
     ->getApplication()
     ->setDefaultCommand('init', true) // Single command application
     ->run()
 ;
+
+function makePascalCaseQuestion(string $prompt, string $label): Question
+{
+    $q = new Question($prompt);
+    $q->setValidator(static function (mixed $answer) use ($label): string {
+        if (!is_string($answer) || $answer === '') {
+            throw new \RuntimeException(sprintf('Please enter a %s.', $label));
+        }
+        if (!preg_match('/^[A-Z][A-Za-z0-9]*$/', $answer)) {
+            throw new \RuntimeException(sprintf('The %s must be PascalCase (start with an uppercase letter, letters and digits only).', $label));
+        }
+        return $answer;
+    });
+    $q->setMaxAttempts(3);
+    return $q;
+}
 
 function replaceInFile(string $file, array $replacements): void
 {
