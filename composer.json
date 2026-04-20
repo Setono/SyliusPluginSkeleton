@@ -25,6 +25,7 @@
         "symfony/intl": "^6.4 || ^7.4",
         "symfony/monolog-bundle": "^3.11",
         "symfony/property-info": "^6.4 || ^7.4",
+        "symfony/security-bundle": "^6.4 || ^7.4",
         "symfony/serializer": "^6.4 || ^7.4",
         "symfony/web-profiler-bundle": "^6.4 || ^7.4",
         "symfony/webpack-encore-bundle": "^2.2"
