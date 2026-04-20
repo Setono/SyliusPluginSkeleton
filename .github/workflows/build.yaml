@@ -1,18 +1,86 @@
 name: "build"
+
 on:
-    push:
-        branches:
-            - "*.*.x"
-            - "master"
-            - "main"
-        paths-ignore:
-            - "**/*.md"
-    pull_request:
-        paths-ignore:
-            - "**/*.md"
+    push: ~
+    pull_request: ~
     workflow_dispatch: ~
 
 jobs:
-    build:
-        uses: "Setono/SyliusPluginSkeleton/.github/workflows/reusable-build.yaml@2.2.x"
-        secrets: "inherit"
+    coding-standards:
+        runs-on: "ubuntu-latest"
+        steps:
+            -   uses: "setono/sylius-plugin/coding-standards@v2"
+    
+    dependency-analysis:
+        runs-on: "ubuntu-latest"
+        strategy:
+            fail-fast: false
+            matrix:
+                php-version: ["8.2", "8.3", "8.4"]
+                dependencies: ["lowest", "highest"]
+                symfony: ["~6.4.0", "~7.4.0"]
+        steps:
+            -   uses: "setono/sylius-plugin/dependency-analysis@v2"
+                with:
+                    php-version: "${{ matrix.php-version }}"
+                    dependencies: "${{ matrix.dependencies }}"
+                    symfony: "${{ matrix.symfony }}"
+    
+    static-code-analysis:
+        runs-on: "ubuntu-latest"
+        strategy:
+            fail-fast: false
+            matrix:
+                php-version: ["8.2", "8.3", "8.4"]
+                dependencies: ["lowest", "highest"]
+                symfony: ["~6.4.0", "~7.4.0"]
+        steps:
+            -   uses: "setono/sylius-plugin/static-code-analysis@v2"
+                with:
+                    php-version: "${{ matrix.php-version }}"
+                    dependencies: "${{ matrix.dependencies }}"
+                    symfony: "${{ matrix.symfony }}"
+    
+    unit-tests:
+        runs-on: "ubuntu-latest"
+        strategy:
+            fail-fast: false
+            matrix:
+                php-version: ["8.2", "8.3", "8.4"]
+                dependencies: ["lowest", "highest"]
+                symfony: ["~6.4.0", "~7.4.0"]
+        steps:
+            -   uses: "setono/sylius-plugin/unit-tests@v2"
+                with:
+                    php-version: "${{ matrix.php-version }}"
+                    dependencies: "${{ matrix.dependencies }}"
+                    symfony: "${{ matrix.symfony }}"
+    
+    integration-tests:
+        runs-on: "ubuntu-latest"
+        strategy:
+            fail-fast: false
+            matrix:
+                php-version: ["8.2", "8.3", "8.4"]
+                dependencies: ["lowest", "highest"]
+                symfony: ["~6.4.0", "~7.4.0"]
+        steps:
+            -   uses: "setono/sylius-plugin/integration-tests@v2"
+                with:
+                    php-version: "${{ matrix.php-version }}"
+                    dependencies: "${{ matrix.dependencies }}"
+                    symfony: "${{ matrix.symfony }}"
+    
+    mutation-tests:
+        runs-on: "ubuntu-latest"
+        steps:
+            -   uses: "setono/sylius-plugin/mutation-tests@v2"
+                with:
+                    stryker-dashboard-api-key: "${{ secrets.STRYKER_DASHBOARD_API_KEY }}"
+    
+    code-coverage:
+        runs-on: "ubuntu-latest"
+        steps:
+            -   uses: "setono/sylius-plugin/code-coverage@v2"
+                with:
+                    codecov-token: "${{ secrets.CODECOV_TOKEN }}"
