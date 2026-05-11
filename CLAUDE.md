@@ -56,6 +56,16 @@ This is a Symfony Bundle structured as a Sylius plugin:
 - Bundle naming follows `{Vendor}Sylius{Name}Plugin` convention
 - DI extension alias uses snake_case (e.g., `acme_sylius_example`)
 
+## Translations
+
+Plugins built from this skeleton should be translated into the following locales (source locale is English):
+
+- Nordic: Danish (`da`), Swedish (`sv`), Norwegian Bokmål (`nb`), Finnish (`fi`)
+- Large EU: German (`de`), French (`fr`), Spanish (`es`), Italian (`it`), Dutch (`nl`), Polish (`pl`)
+- Other common Sylius locales: Portuguese (`pt`), Czech (`cs`), Hungarian (`hu`), Russian (`ru`), Ukrainian (`uk`)
+
+Translation files live in `translations/` and follow Symfony's `<domain>.<locale>.<format>` naming.
+
 ## CI Matrix
 
 CI tests against PHP 8.2 + 8.3, Symfony 6.4 + 7.2, lowest + highest deps. Jobs: coding standards, dependency analysis, Psalm, PHPUnit, integration tests (MySQL + Doctrine schema validation), mutation tests, code coverage.
