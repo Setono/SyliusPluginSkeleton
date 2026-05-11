@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Acme\SyliusExamplePlugin\Tests\DependencyInjection;
+namespace Acme\SyliusExamplePlugin\Tests\Unit\DependencyInjection;
 
 use Acme\SyliusExamplePlugin\DependencyInjection\AcmeSyliusExampleExtension;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
