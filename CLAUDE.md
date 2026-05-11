@@ -60,7 +60,7 @@ This is a Symfony Bundle structured as a Sylius plugin:
 
 Plugins built from this skeleton should be translated into the following locales (source locale is English):
 
-- Nordic: Danish (`da`), Swedish (`sv`), Norwegian Bokmål (`nb`), Finnish (`fi`)
+- Nordic: Danish (`da`), Swedish (`sv`), Norwegian (`no`), Finnish (`fi`)
 - Large EU: German (`de`), French (`fr`), Spanish (`es`), Italian (`it`), Dutch (`nl`), Polish (`pl`)
 - Other common Sylius locales: Portuguese (`pt`), Czech (`cs`), Hungarian (`hu`), Russian (`ru`), Ukrainian (`uk`)
 
