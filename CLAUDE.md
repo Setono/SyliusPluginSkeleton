@@ -62,7 +62,7 @@ Plugins built from this skeleton should be translated into the following locales
 
 - Nordic: Danish (`da`), Swedish (`sv`), Norwegian (`no`), Finnish (`fi`)
 - Large EU: German (`de`), French (`fr`), Spanish (`es`), Italian (`it`), Dutch (`nl`), Polish (`pl`)
-- Other common Sylius locales: Portuguese (`pt`), Czech (`cs`), Hungarian (`hu`), Russian (`ru`), Ukrainian (`uk`)
+- Other common Sylius locales: Portuguese (`pt`), Czech (`cs`), Hungarian (`hu`), Romanian (`ro`), Ukrainian (`uk`)
 
 Translation files live in `translations/` and follow Symfony's `<domain>.<locale>.<format>` naming.
 
