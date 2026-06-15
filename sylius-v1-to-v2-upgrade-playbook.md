@@ -824,9 +824,9 @@ Document in CLAUDE.md so future contributors don't drift.
 
 ---
 
-## 13. Translation key hygiene
+## 13. Translations: key hygiene and target locales
 
-Update **every** locale file in `translations/`, not just English. Missing translations leak the raw key into the UI for non-English admins.
+**Key hygiene.** Update **every** locale file in `translations/`, not just English. Missing translations leak the raw key into the UI for non-English admins.
 
 CLAUDE.md guidance:
 
@@ -838,6 +838,23 @@ CLAUDE.md guidance:
 ```
 
 If you remove translation keys, list them in `UPGRADE.md` so consumers cleaning up their own translation overrides know what to drop.
+
+**Target locales.** Use the upgrade as the moment to bring the plugin's translation coverage up to the Setono standard. The source locale is English (`en`); translate every domain in `translations/` into the following locales:
+
+* **Nordic**: Danish (`da`), Swedish (`sv`), Norwegian (`no`), Finnish (`fi`)
+* **Large EU**: German (`de`), French (`fr`), Spanish (`es`), Italian (`it`), Dutch (`nl`), Polish (`pl`)
+* **Other common Sylius locales**: Portuguese (`pt`), Czech (`cs`), Hungarian (`hu`), Romanian (`ro`), Ukrainian (`uk`)
+
+Translation files follow Symfony's `<domain>.<locale>.<format>` naming (e.g. `messages.da.yaml`, `validators.de.yaml`).
+
+CLAUDE.md guidance:
+
+```
+- Plugins should ship translations for these locales (source locale is English):
+  Nordic — da, sv, no, fi; Large EU — de, fr, es, it, nl, pl; Other common
+  Sylius locales — pt, cs, hu, ro, uk. Translation files live in `translations/`
+  and follow Symfony's `<domain>.<locale>.<format>` naming.
+```
 
 ---
 
@@ -985,7 +1002,7 @@ These aren't strictly part of the v1→v2 upgrade, but they tend to surface duri
 * If you `cd` into `tests/Application/` for a step, `cd` back to the project root before subsequent commands. Don't compensate by prepending an absolute path.
 * Run the test-app console from the project root via `./tests/Application/bin/console <cmd>` instead of `cd tests/Application && php bin/console <cmd>`.
 * Twig extension/runtime split (see §7).
-* Translation key hygiene (see §13).
+* Translation key hygiene and target locales (see §13).
 * Pre-commit checks (see §19).
 * `ManagerRegistry` over `EntityManagerInterface` (see §8).
 * FQCN service ids (see §4).
@@ -1011,7 +1028,8 @@ If you're driving this with an agent, here's an order that minimizes rebuild loo
 12. **Switch service ids to FQCN** (§4) — touch only services you're already modifying. Catch known Sylius core renames (`sylius.integer_distributor` → `sylius.distributor.integer`).
 13. **Migrate Doctrine call sites to `ManagerRegistry`** (§8).
 14. **Pin behavior changes intentionally** (§17), update `UPGRADE.md` (§18) and `README.md` continuously.
-15. **Final pass**: `composer fix-style && composer analyse && composer phpunit` clean, Playwright green on every UI surface, CI green on the full matrix.
+15. **Translate into all target locales** (§13) — add or refresh `translations/<domain>.<locale>.yaml` for every locale in the target set, not just English.
+16. **Final pass**: `composer fix-style && composer analyse && composer phpunit` clean, Playwright green on every UI surface, CI green on the full matrix.
 
 ---
 
