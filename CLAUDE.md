@@ -27,6 +27,11 @@ Follow clean code principles and SOLID design patterns when working with this co
 - Ensure tests are isolated and don't depend on external state
 - Test both happy path and edge cases
 
+### UI Verification
+- **All UI changes MUST be verified using the Playwright MCP** - After making any change that affects the rendered UI (templates, forms, styling, layout, flash messages, etc.), use the Playwright MCP to navigate the running test application and confirm the change renders and behaves as expected
+- Run the test application (see [Test Application](#test-application)) and use the Playwright MCP `browser_navigate`, `browser_snapshot`, and `browser_take_screenshot` tools to inspect the affected pages
+- Verify both the visual result and the interactive behavior (e.g. submitting forms, triggering flash messages)
+
 ## Development Commands
 
 Based on the `composer.json` scripts section:
