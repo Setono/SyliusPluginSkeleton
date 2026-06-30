@@ -9,5 +9,8 @@
     },
     "devDependencies": {
         "@sylius-ui/frontend": "^1.0.3"
+    },
+    "resolutions": {
+        "jquery": "^3.7.1"
     }
 }
