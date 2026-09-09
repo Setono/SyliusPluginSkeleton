@@ -16,6 +16,15 @@ jobs:
         runs-on: "ubuntu-latest"
         steps:
             -   uses: "setono/sylius-plugin/coding-standards@v2"
+
+            -   name: "Install Symfony CLI"
+                run: |
+                    mkdir -p "$RUNNER_TEMP/symfony-cli"
+                    curl -sSL https://github.com/symfony-cli/symfony-cli/releases/latest/download/symfony-cli_linux_amd64.tar.gz | tar -xzf - -C "$RUNNER_TEMP/symfony-cli" symfony
+                    echo "$RUNNER_TEMP/symfony-cli" >> "$GITHUB_PATH"
+
+            -   name: "Run Symfony diagnostics"
+                run: "symfony lsp:check --format=github"
     
     dependency-analysis:
         runs-on: "ubuntu-latest"
@@ -46,26 +55,6 @@ jobs:
                     php-version: "${{ matrix.php-version }}"
                     dependencies: "${{ matrix.dependencies }}"
                     symfony: "${{ matrix.symfony }}"
-    
-    symfony-diagnostics:
-        runs-on: "ubuntu-latest"
-        steps:
-            -   uses: "actions/checkout@v6"
-
-            -   uses: "shivammathur/setup-php@v2"
-                with:
-                    php-version: "8.4"
-                    extensions: "intl, mbstring"
-                    coverage: "none"
-                    tools: "flex, symfony-cli"
-
-            -   uses: "ramsey/composer-install@v4"
-                env:
-                    SYMFONY_REQUIRE: "~7.4.0"
-                with:
-                    dependency-versions: "highest"
-
-            -   run: "symfony lsp:check --format=github"
     
     unit-tests:
         runs-on: "ubuntu-latest"
