@@ -3,7 +3,6 @@ framework:
     ide: phpstorm
     form:
         enabled: true
-        legacy_error_messages: false
     csrf_protection: true
     session:
         handler_id: ~
