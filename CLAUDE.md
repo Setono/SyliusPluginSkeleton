@@ -28,6 +28,7 @@ composer fix-style                        # ECS auto-fix
 vendor/bin/rector process --dry-run       # check code modernization
 vendor/bin/composer-dependency-analyser   # check dependency usage
 vendor/bin/infection                      # mutation testing (requires 100% MSI)
+symfony lsp:check                         # Symfony-aware diagnostics against the test app (needs Symfony CLI >= 5.20)
 composer validate --strict                # validate composer.json
 composer normalize --dry-run              # check composer.json normalization
 ```
