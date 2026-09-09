@@ -10,6 +10,9 @@
     <testsuites>
         <testsuite name="AcmeSyliusExamplePlugin Test Suite">
             <directory>tests</directory>
+            <!-- tests/Application/vendor is a symlink to the root vendor directory (needed by symfony-lsp) and PHPUnit follows symlinks, so exclude both -->
+            <exclude>tests/Application</exclude>
+            <exclude>vendor</exclude>
         </testsuite>
     </testsuites>
     <php>

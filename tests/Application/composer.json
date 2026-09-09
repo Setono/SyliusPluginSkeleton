@@ -1,5 +1,13 @@
 {
     "name": "setono/sylius-plugin-skeleton-test-application",
-    "description": "Sylius application for plugin testing purposes (composer.json needed for project dir resolving)",
-    "license": "MIT"
+    "description": "Sylius application for plugin testing purposes (composer.json needed for project dir resolving and for symfony-lsp to discover the application)",
+    "license": "MIT",
+    "require": {
+        "symfony/framework-bundle": "^6.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Acme\\SyliusExamplePlugin\\Tests\\Application\\": ""
+        }
+    }
 }
