@@ -156,6 +156,44 @@ jobs:
             -   name: "Static analysis"
                 run: "composer analyse"
 
+    symfony-diagnostics:
+        name: "Symfony diagnostics (PHP${{ matrix.php-version }} | Deps: ${{ matrix.dependencies }} | SF${{ matrix.symfony }})"
+
+        runs-on: "ubuntu-latest"
+
+        strategy:
+            matrix:
+                php-version:
+                    - "8.3"
+
+                dependencies:
+                    - "highest"
+
+                symfony:
+                    - "~6.4.0"
+
+        steps:
+            -   name: "Checkout"
+                uses: "actions/checkout@v5"
+
+            -   name: "Setup PHP, with composer and extensions"
+                uses: "shivammathur/setup-php@v2"
+                with:
+                    coverage: "none"
+                    extensions: "${{ env.PHP_EXTENSIONS }}"
+                    php-version: "${{ matrix.php-version }}"
+                    tools: "flex, symfony-cli"
+
+            -   name: "Install composer dependencies"
+                uses: "ramsey/composer-install@v3"
+                env:
+                    SYMFONY_REQUIRE: "${{ matrix.symfony }}"
+                with:
+                    dependency-versions: "${{ matrix.dependencies }}"
+
+            -   name: "Run Symfony diagnostics"
+                run: "symfony lsp:check --format=github"
+
     unit-tests:
         name: "Unit tests (PHP${{ matrix.php-version }} | Deps: ${{ matrix.dependencies }} | SF${{ matrix.symfony }})"
 
