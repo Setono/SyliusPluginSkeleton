@@ -41,6 +41,7 @@ Based on the `composer.json` scripts section:
 - `composer check-style` - Check code style with ECS (Easy Coding Standard)
 - `composer fix-style` - Fix code style issues automatically with ECS
 - `composer phpunit` - Run PHPUnit tests
+- `symfony lsp:check` - Run Symfony-aware diagnostics (routes, services, templates, translations, config) against the test application. Requires the Symfony CLI 5.20 or newer
 
 ### Static Analysis
 
