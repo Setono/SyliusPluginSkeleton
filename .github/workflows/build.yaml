@@ -41,7 +41,7 @@ jobs:
                     php-version: "${{ matrix.php-version }}"
                     extensions: "${{ env.PHP_EXTENSIONS }}"
                     coverage: "none"
-                    tools: "symfony-cli"
+                    tools: "symfony"
 
             -   name: "Install composer dependencies"
                 uses: "ramsey/composer-install@v3"
