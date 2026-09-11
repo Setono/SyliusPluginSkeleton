@@ -16,6 +16,7 @@
     },
     "require-dev": {
         "api-platform/symfony": "^4.3.3",
+        "doctrine/orm": "<3.7",
         "payum/core": "^1.7.5",
         "setono/sylius-plugin": "^2.0",
         "sylius/grid-bundle": "^1.15",
@@ -23,8 +24,9 @@
         "symfony/debug-bundle": "^6.4 || ^7.4",
         "symfony/dotenv": "^6.4 || ^7.4",
         "symfony/intl": "^6.4 || ^7.4",
-        "symfony/property-info": "^6.4 || ^7.4",
+        "symfony/property-info": "^6.4 || >=7.4 <7.4.7",
         "symfony/serializer": "^6.4 || ^7.4",
+        "symfony/type-info": "<7.4.6",
         "symfony/web-profiler-bundle": "^6.4 || ^7.4",
         "symfony/webpack-encore-bundle": "^2.2"
     },
