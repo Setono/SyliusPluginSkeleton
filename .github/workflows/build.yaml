@@ -17,14 +17,14 @@ jobs:
         steps:
             -   uses: "setono/sylius-plugin/coding-standards@v2"
 
-            -   name: "Install Symfony CLI"
-                run: |
-                    mkdir -p "$RUNNER_TEMP/symfony-cli"
-                    curl -sSL https://github.com/symfony-cli/symfony-cli/releases/latest/download/symfony-cli_linux_amd64.tar.gz | tar -xzf - -C "$RUNNER_TEMP/symfony-cli" symfony
-                    echo "$RUNNER_TEMP/symfony-cli" >> "$GITHUB_PATH"
+            -   uses: "shivammathur/setup-php@v2"
+                with:
+                    php-version: "8.2"
+                    extensions: "intl, mbstring"
+                    coverage: "none"
+                    tools: "symfony"
 
-            -   name: "Run Symfony diagnostics"
-                run: "symfony lsp:check --format=github"
+            -   run: "symfony lsp:check --format=github"
     
     dependency-analysis:
         runs-on: "ubuntu-latest"
