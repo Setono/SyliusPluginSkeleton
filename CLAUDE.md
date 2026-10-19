@@ -156,12 +156,33 @@ Install these the first time a task needs them, then update this file: move the 
   - DI extension: `Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase`.
   - Configuration: `Matthias\SymfonyConfigTest\PhpUnit\ConfigurationTestCaseTrait`.
   - Kernel and web tests: call `restore_exception_handler()` in `tearDown()`.
-  - Form types: follow https://symfony.com/doc/current/form/unit_testing.html.
-    - Extend `Symfony\Component\Form\Test\TypeTestCase` and create forms with `$this->factory->create()`.
-    - Test submission, `isSynchronized()` and data transformation.
-    - Register types that have dependencies through a `PreloadedExtension`.
-    - Don't test validation in form tests.
-  - Constraint validators: `ConstraintValidatorTestCase`. Console commands: `CommandTester`.
+  - Constraint validators: `ConstraintValidatorTestCase`.
+- **Console commands:** follow https://symfony.com/doc/current/console.html#testing-commands.
+  - **Functional tests:** extend `KernelTestCase` and create `new Application(self::$kernel)`, using the FrameworkBundle `Application`. Get the command with `$application->find('<command name>')` and run it with `CommandTester::execute()`.
+  - **Unit tests:** construct the command with Prophecy doubles and pass it to `new CommandTester($command)`.
+  - **Arguments and options:**
+    - Pass options with two dashes, e.g. `'--dry-run' => true`. `InputOption::VALUE_NONE` options take `true`, and array options take an array.
+    - Answer interactive questions with `$commandTester->setInputs([...])`.
+  - **Assertions:**
+    - Use `$commandTester->assertCommandIsSuccessful()` and assert on `getDisplay()`.
+    - Pass `['capture_stderr_separately' => true]` to `execute()` when testing stderr or `section()` output.
+  - **Console events:** `CommandTester` doesn't dispatch them. To test events, or the application as a whole, use `ApplicationTester`, and call `$application->setAutoExit(false)` first.
+  - **Symfony 8.1:** `KernelTestCase::runCommand()` and its `ExecutionResult` are the recommended way from Symfony 8.1. The plugin's Symfony floor is 6.4, so use `CommandTester` until that floor reaches 8.1.
+- **Form types:** follow https://symfony.com/doc/current/form/unit_testing.html. Test the plugin's own form types; built-in and third-party types need no tests.
+  - Extend `Symfony\Component\Form\Test\TypeTestCase`. Create forms through `$this->factory->create(FooType::class, $model)`, never by instantiating the type.
+  - Start with a test that the type compiles: class inheritance, `buildForm()` and option resolution.
+  - Submit with `$form->submit($formData)` and assert `$form->isSynchronized()`, which is false only when a data transformer failed. Then compare the model with an `$expected` object built from `$formData`.
+  - Test custom view variables through `createView()` and `$view->vars`.
+  - Cover several form conditions with a data provider rather than copies of the same test.
+  - **Types with constructor dependencies:**
+    - Create the doubles with Prophecy in `setUp()` before calling `parent::setUp()`, because that call builds the factory from `getExtensions()`.
+    - Return the type instance from `getExtensions()` in a `PreloadedExtension`.
+  - **Other extensions:**
+    - Only the `CoreExtension` is loaded by default. Return other extensions from `getExtensions()`, e.g. `ValidatorExtension` when the type uses validator options such as `invalid_message`; otherwise the test fails with an `InvalidOptionsException`.
+    - Return additional types, type extensions and type guessers from `getTypes()`, `getTypeExtensions()` and `getTypeGuessers()`.
+  - **`EntityType`:** types that use it need the `DoctrineOrmExtension` with a `ManagerRegistry` double. When that isn't practical, extend `KernelTestCase` and create the form with the `form.factory` service.
+  - **Validation:** don't test it in form tests. It's applied by a listener that isn't active in the test case, and it depends on the validation configuration. Test the constraints directly with `ConstraintValidatorTestCase`.
+  - **Form themes:** extend `Symfony\Bridge\Twig\Test\FormLayoutTestCase`.
 - **UI verification:**
   - Verify every UI change (templates, Twig hooks, forms, grids, flash messages, styling) in the running test application with the Playwright MCP (`browser_navigate`, `browser_snapshot`, `browser_take_screenshot`). Check both what renders and how it behaves, e.g. submit the form.
   - PHPUnit, PHPStan and ECS don't catch broken hooks, missing JavaScript or layout regressions.
