@@ -6,6 +6,7 @@
 /README.md                          export-ignore
 /UPGRADE.md                         export-ignore
 /behat.yml.dist                     export-ignore
+/codecov.yml                        export-ignore
 /composer-dependency-analyser.php   export-ignore
 /docs                               export-ignore
 /docs                               export-ignore
