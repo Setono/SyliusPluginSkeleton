@@ -1,6 +1,6 @@
 /.build/
 /vendor/
-/node_modules/
+/node_modules
 /composer.lock
 
 /tests/Application/yarn.lock
