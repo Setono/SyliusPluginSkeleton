@@ -8,6 +8,9 @@
 /.phpunit.cache/
 /.phpunit.result.cache
 
+# symfony lsp:check analyzes the repository root and caches in var/symfony-lsp
+/var/
+
 # Symfony CLI https://symfony.com/doc/current/setup/symfony_server.html#different-php-settings-per-project
 /.php-version
 /php.ini
