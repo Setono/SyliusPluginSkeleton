@@ -1,7 +1,7 @@
 parameters:
     # Adds a fallback APP_SECRET if the env var is not set, like DATABASE_URL in doctrine.yaml. symfony lsp:check
     # analyzes the repository root and only loads a .env file from there, so it boots the kernel without
-    # tests/Application/.env
+    # tests/Application/.env. Remove this once that is fixed: https://github.com/symfony/language-tools/issues/120
     env(APP_SECRET): 'EDITME'
 
 framework:
