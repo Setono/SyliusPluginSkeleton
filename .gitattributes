@@ -12,7 +12,6 @@
 /ecs.php                            export-ignore
 /etc                                export-ignore
 /infection.json.dist                export-ignore
-/node_modules                       export-ignore
 /phpunit.xml.dist                   export-ignore
 /psalm-baseline.xml                 export-ignore
 /psalm.xml                          export-ignore
