@@ -192,7 +192,7 @@ Install these the first time a task needs them, then update this file: move the 
 
 - **PHPStan** runs at level max with the Symfony, Doctrine, PHPUnit and Prophecy extensions, without a baseline. Fix errors rather than ignore them. When an ignore is unavoidable, scope it to the error identifier and the line, with a comment saying why.
 - **Rector** `--dry-run` must be clean; CI fails otherwise.
-- **Code coverage** must be at least 90%, for the project and for the lines each change adds or modifies (`codecov.yml`). Like the Infection thresholds, the targets only go up and have no tolerance below them. Check coverage locally with `vendor/bin/phpunit --coverage-text` (needs pcov or Xdebug).
+- **Code coverage** must be at least 90%, for the project and for the lines each change adds or modifies (`codecov.yml`). Like the Infection thresholds, the targets only go up and have no tolerance below them. The unit and functional suites both count, because CI measures coverage against the test application's database and fixtures. Check coverage locally with `vendor/bin/phpunit --coverage-text` (needs pcov or Xdebug, and the test application's database for the functional suite).
 - **Infection** thresholds only go up. The skeleton starts at 100% MSI. When tests raise the score, raise `minMsi`/`minCoveredMsi` in the same change, and never lower them to get a change through.
 - **composer-dependency-analyser** runs with `require-dev` removed. Every package used in `src/` or `config/` must be in `require`, and every ignore needs a comment explaining why.
 - **Dev-only version pins:**
@@ -225,4 +225,4 @@ CI uses the `setono/sylius-plugin/*@v2` composite actions. Most jobs run a matri
 - **Unit tests:** the `unit` suite.
 - **Functional tests:** highest dependencies only. Builds the assets, creates the MySQL schema, runs `doctrine:schema:validate`, loads the fixtures and runs the `functional` suite.
 - **Mutation tests:** Infection.
-- **Code coverage:** uploads the PHPUnit coverage to Codecov. Codecov's project and patch statuses fail below 90%.
+- **Code coverage:** sets up the test application like the functional tests do (MySQL, assets, schema and fixtures), runs all PHPUnit suites with pcov and uploads the coverage to Codecov. Codecov's project and patch statuses fail below 90%.
