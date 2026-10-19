@@ -91,4 +91,5 @@ jobs:
         steps:
             -   uses: "setono/sylius-plugin/code-coverage@v2"
                 with:
+                    symfony: "~7.4.0"
                     codecov-token: "${{ secrets.CODECOV_TOKEN }}"
