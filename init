@@ -142,7 +142,8 @@ use Symfony\Component\Process\Process;
         $io->text('Renaming classes and config files…');
         rename('src/DependencyInjection/AcmeSyliusExampleExtension.php', sprintf('src/DependencyInjection/%s%sExtension.php', $vendor, $pluginName));
         rename('src/AcmeSyliusExamplePlugin.php', sprintf('src/%s%s.php', $vendor, $pluginNameWithSuffix));
-        rename('tests/DependencyInjection/AcmeSyliusExampleExtensionTest.php', sprintf('tests/DependencyInjection/%s%sExtensionTest.php', $vendor, $pluginName));
+        rename('tests/Unit/DependencyInjection/AcmeSyliusExampleExtensionTest.php', sprintf('tests/Unit/DependencyInjection/%s%sExtensionTest.php', $vendor, $pluginName));
+        rename('tests/Unit/AcmeSyliusExamplePluginTest.php', sprintf('tests/Unit/%s%sTest.php', $vendor, $pluginNameWithSuffix));
 
         if (file_exists('tests/Application/config/packages/acme_sylius_example.yaml')) {
             rename('tests/Application/config/packages/acme_sylius_example.yaml', sprintf('tests/Application/config/packages/%s.yaml', $yamlNamespace));

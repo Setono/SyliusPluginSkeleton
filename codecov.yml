@@ -1,0 +1,21 @@
+# https://docs.codecov.com/docs/codecovyml-reference
+# The code-coverage job in .github/workflows/build.yaml runs PHPUnit with pcov and uploads the coverage of the files
+# in phpunit.xml.dist's <source> (src/)
+coverage:
+    # Color coverage in Codecov's UI against the targets below: red under 90%, green at 100%
+    range: "90...100"
+    status:
+        project:
+            default:
+                # The target only ever goes up: raise it as coverage grows, never lower it to get a change through.
+                # There is deliberately no threshold, which would let coverage dip below the target
+                target: 90%
+        patch:
+            default:
+                # The lines a change adds or modifies
+                target: 90%
+
+comment:
+    layout: "condensed_header, diff, files"
+    # Only comment on pull requests that change coverage
+    require_changes: true
