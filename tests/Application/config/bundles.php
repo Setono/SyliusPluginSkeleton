@@ -30,7 +30,8 @@ return [
     Sylius\Bundle\CoreBundle\SyliusCoreBundle::class => ['all' => true],
     Sylius\Bundle\ResourceBundle\SyliusResourceBundle::class => ['all' => true],
     Sylius\Bundle\GridBundle\SyliusGridBundle::class => ['all' => true],
-    Knp\Bundle\GaufretteBundle\KnpGaufretteBundle::class => ['all' => true],
+    // Sylius 2.2 requires and configures Gaufrette, Sylius 2.3 removed both, so register the bundle only where Sylius installs it
+    ...(class_exists(Knp\Bundle\GaufretteBundle\KnpGaufretteBundle::class) ? [Knp\Bundle\GaufretteBundle\KnpGaufretteBundle::class => ['all' => true]] : []),
     Knp\Bundle\MenuBundle\KnpMenuBundle::class => ['all' => true],
     Liip\ImagineBundle\LiipImagineBundle::class => ['all' => true],
     Payum\Bundle\PayumBundle\PayumBundle::class => ['all' => true],
