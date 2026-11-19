@@ -75,13 +75,21 @@ This is a Symfony bundle structured as a Sylius 2 plugin, with `config/`, `templ
 
 Install these the first time a task needs them, then update this file: move the entry into the section it belongs to, and add its commands to [Commands](#commands).
 
-- **Browser tests:** install [playwright-php/playwright-symfony](https://github.com/playwright-php/playwright-symfony) and use it rather than Panther or a JavaScript Playwright suite.
-  - Run `composer require --dev playwright-php/playwright-symfony`, then `vendor/bin/playwright-install --browsers`.
+- **Browser tests:** install [playwright-php/playwright-symfony](https://github.com/playwright-php/playwright-symfony) with the plugin's first UI change (see [UI verification](#testing)), and use it rather than Panther or a JavaScript Playwright suite.
+  - Run `composer require --dev playwright-php/playwright-symfony`, then `vendor/bin/playwright-install chromium` (its default browser).
   - Register `Playwright\Symfony\PlaywrightSymfonyBundle::class => ['test' => true]` in `tests/Application/config/bundles.php`.
   - Tests extend `Playwright\Symfony\Test\PlaywrightTestCase`. Put them in `tests/Browser/` with a `browser` testsuite in `phpunit.xml.dist`.
+  - The test's own kernel handles the browser's requests, with no web server, so a test sees the data it creates. Install the database-writes bundle below along with it.
   - Specs discover their subjects (products, customers) from the fixtures instead of hardcoding ids. Elements they need get hooks through `{{ sylius_test_html_attribute('name', value) }}`, never a raw `data-test-*` attribute.
-  - Make sure CI runs the suite. The `setono/sylius-plugin` actions don't install Playwright browsers yet.
+  - Pass `$page->screenshot()` an absolute path. The Playwright server resolves a relative one against its own working directory.
+  - **Bundle assets:** the asset bridge serves only the URL prefixes in `playwright.assets.prefixes` (default `/assets`, `/build` and `/_framework/ux`). When the plugin ships files in `public/`, add `/bundles` to the list in `tests/Application/config/packages/playwright.yaml`. Before the suite runs, locally and in CI, copy the files with `tests/Application/bin/console assets:install`, and copy them again after they change. A `--symlink` install serves nothing, because the bridge skips files that resolve outside the test app's `public/`.
+  - **CI:** add a `browser-tests` job to `.github/workflows/build.yaml`.
+    - Start it with `setono/sylius-plugin/functional-tests@v2` without a `testsuite`. The action then only sets up the test application (MySQL, Node, `yarn build`, schema and fixtures).
+    - Then run `assets:install` (when the plugin ships public files), `vendor/bin/playwright-install --with-deps chromium` and `vendor/bin/phpunit --testsuite=browser`. Set `APP_ENV: "test"` and the action's `DATABASE_URL` (`mysql://root:root@127.0.0.1/sylius?serverVersion=8.0`) in the job's `env`.
+    - Pass `testsuite: "unit,functional"` to the `code-coverage` job, which installs no browsers.
 - **Database writes in tests:** install `dama/doctrine-test-bundle` so each test runs in a transaction that is rolled back.
+  - Register `DAMA\DoctrineTestBundle\DAMADoctrineTestBundle::class => ['test' => true]` in `tests/Application/config/bundles.php`, and its PHPUnit extension (`<bootstrap class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension"/>`) in `phpunit.xml.dist`.
+  - The bundle needs `use_savepoints: true`, which the test application's `doctrine.yaml` already sets. DBAL 3, which Sylius 2.2 requires, makes savepoints opt-in, and without them the container doesn't compile.
 - **Doctrine in services:** require `setono/doctrine-orm-trait`. Inject `ManagerRegistry` and use `Setono\Doctrine\ORMTrait` instead of injecting `EntityManagerInterface`.
 - **Composite services** (several implementations behind one interface, collected by tag): require `setono/composite-compiler-pass` and register its compiler pass in the bundle's `build()`.
 
@@ -189,16 +197,18 @@ Install these the first time a task needs them, then update this file: move the 
   - **Validation:** don't test it in form tests. It's applied by a listener that isn't active in the test case, and it depends on the validation configuration. Test the constraints directly with `ConstraintValidatorTestCase`.
   - **Form themes:** extend `Symfony\Bridge\Twig\Test\FormLayoutTestCase`.
 - **UI verification:**
-  - Verify every UI change (templates, Twig hooks, forms, grids, flash messages, styling) in the running test application with the Playwright MCP (`browser_navigate`, `browser_snapshot`, `browser_take_screenshot`). Check both what renders and how it behaves, e.g. submit the form.
-  - PHPUnit, PHPStan and ECS don't catch broken hooks, missing JavaScript or layout regressions.
-  - Use the MCP while developing. Durable coverage belongs in browser tests (see [Add when needed](#add-when-needed)).
+  - Cover every UI change (templates, Twig hooks, forms, grids, flash messages, styling) with a browser test in `tests/Browser/` (see Browser tests under [Add when needed](#add-when-needed)). Test both what renders and how it behaves, e.g. submit the form.
+  - Before reporting the work as done, take a screenshot of each page the change touches with `$page->screenshot()` and look at it.
+  - The unit and functional suites, PHPStan and ECS don't catch broken hooks, missing JavaScript or layout regressions. Twig hook wiring fails silently, so only the rendered page shows that it works.
 
 ## Quality Gates
 
 - **PHPStan** runs at level max with the Symfony, Doctrine, PHPUnit and Prophecy extensions, without a baseline. Fix errors rather than ignore them. When an ignore is unavoidable, scope it to the error identifier and the line, with a comment saying why.
 - **Rector** `--dry-run` must be clean; CI fails otherwise.
-- **Code coverage** must be at least 90%, for the project and for the lines each change adds or modifies (`codecov.yml`). Like the Infection thresholds, the targets only go up and have no tolerance below them. The unit and functional suites both count, because CI measures coverage against the test application's database and fixtures. Check coverage locally with `vendor/bin/phpunit --coverage-text` (needs pcov or Xdebug, and the test application's database for the functional suite).
-- **Infection** thresholds only go up. The skeleton starts at 100% MSI. When tests raise the score, raise `minMsi`/`minCoveredMsi` in the same change, and never lower them to get a change through.
+- **Code coverage** must be at least 90%, for the project and for the lines each change adds or modifies (`codecov.yml`). Like the Infection thresholds, the targets only go up and have no tolerance below them. The unit and functional suites both count, because CI measures coverage against the test application's database and fixtures. Browser tests don't count. Check coverage locally with `vendor/bin/phpunit --testsuite=unit,functional --coverage-text` (needs pcov or Xdebug, and the test application's database for the functional suite).
+- **Infection** runs only the `unit` suite (`testFrameworkOptions` in `infection.json5`), because the mutation-tests job has no database, assets or browsers. The thresholds only go up. The skeleton starts `minMsi` and `minCoveredMsi` at 100%. When tests raise the score, raise them in the same change, and never lower them to get a change through.
+  - Infection runs without `--with-uncovered`, so it mutates only code the unit suite covers. Code that only functional tests reach (a repository, a Doctrine listener) gets no mutants, so neither score drops.
+  - That code escapes mutation testing, so put logic worth mutating in services the unit suite covers.
 - **composer-dependency-analyser** runs with `require-dev` removed. Every package used in `src/` or `config/` must be in `require`, and every ignore needs a comment explaining why.
 - **Dev-only version pins:**
   - They go in `require-dev`, never in `conflict`, so they don't affect projects installing the plugin.
@@ -229,5 +239,5 @@ CI uses the `setono/sylius-plugin/*@v2` composite actions. The `build` workflow 
 - **Static code analysis:** PHPStan.
 - **Unit tests:** the `unit` suite.
 - **Functional tests:** the same matrix, so the test application also boots on the lowest dependencies. Builds the assets, creates the MySQL schema, runs `doctrine:schema:validate`, loads the fixtures and runs the `functional` suite.
-- **Mutation tests:** Infection.
-- **Code coverage:** sets up the test application like the functional tests do (MySQL, assets, schema and fixtures), runs all PHPUnit suites with pcov and uploads the coverage to Codecov. Codecov's project and patch statuses fail below 90%.
+- **Mutation tests:** Infection on the `unit` suite, without a database. The action runs the latest Infection release that setup-php installs, not `vendor/bin/infection`.
+- **Code coverage:** sets up the test application like the functional tests do (MySQL, assets, schema and fixtures), runs PHPUnit with pcov and uploads the coverage to Codecov. It runs every suite unless the job passes a `testsuite`, which takes a comma-separated list (`unit,functional`). Codecov's project and patch statuses fail below 90%.
