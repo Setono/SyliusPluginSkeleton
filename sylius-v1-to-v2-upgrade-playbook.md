@@ -248,27 +248,15 @@ CLAUDE.md guidance to add:
 
 ---
 
-## 5. Bundle prepending: ship config from `prepend()`, not YAML
+## 5. Configuring other bundles: `prepend()` instead of YAML, PHP classes for grids
 
-In Sylius 1.x plugins, you'd ship `config/app/config.yaml` and ask consumers to `imports:` it. In 2.x, prepend the config from your bundle extension and remove the YAML file entirely:
+In Sylius 1.x plugins, you'd ship `config/app/config.yaml` and ask consumers to `imports:` it. In 2.x, prepend the config from your bundle extension and remove the YAML file entirely. Admin grids are the exception: ship them as PHP grid classes (see [Admin grids](#admin-grids-php-grid-classes-not-prepended-arrays) below).
 
 ```php
 final class YourExtension extends AbstractResourceExtension implements PrependExtensionInterface
 {
     public function prepend(ContainerBuilder $container): void
     {
-        $container->prependExtensionConfig('sylius_grid', [
-            'grids' => [
-                'your_plugin_admin_thing' => [
-                    'driver' => [
-                        'name' => 'doctrine/orm',
-                        'options' => ['class' => '%your_plugin.model.thing.class%'],
-                    ],
-                    // …fields, filters, actions
-                ],
-            ],
-        ]);
-
         $container->prependExtensionConfig('sylius_twig_hooks', [/* … */]);
         $container->prependExtensionConfig('doctrine',           [/* … */]);
     }
@@ -277,17 +265,100 @@ final class YourExtension extends AbstractResourceExtension implements PrependEx
 
 Inline the array literal directly in `prepend()` — don't keep YAML on disk and parse it. The integration point becomes greppable and there's no I/O at compile time.
 
-Tell consumers to drop the import in `UPGRADE.md`:
+### Prepended config adds; it can't override what Sylius sets
 
-| `@YourPlugin/config/app/config.yaml` | Removed — the plugin's grid and twig-hook configuration is now registered automatically via `YourExtension::prepend()`. Drop the matching `imports:` entry from your `config/packages/your_plugin.yaml`. |
+`prependExtensionConfig()` puts the plugin's array at the front of the receiving bundle's config list (`array_unshift` in `ContainerBuilder`), so it has the lowest precedence. Everything the application loads is merged after it, including the Sylius config files that `config/packages/_sylius.yaml` imports. New keys work: a new hookable, email or workflow. A value Sylius already sets beats the plugin's, and nothing reports it:
+
+* Changing the template or priority of a hookable Sylius defines, or the template of a Sylius email (`sylius_mailer.emails.order_confirmation.template`), has no effect.
+* Disabling a Sylius hookable with `enabled: false` has no effect either. The twig-hooks configuration derives each hookable's `type` per config fragment, and Sylius' later fragment, which sets `template`, turns it back into a template hookable. Verified on Sylius 2.2.13: prepending `enabled: false` for `terms_and_conditions` under `sylius_shop.base.footer.content.menu.informational_links` leaves the placeholder footer link enabled.
+
+To change what Sylius configures, use one of these instead:
+
+* **Application config.** Document the YAML in the README. The application's own files under `config/packages/` load after `_sylius.yaml`, so they win. This suits changes that are the merchant's choice, such as hiding Sylius' placeholder footer links.
+* **A compiler pass** in the plugin bundle's `build()` that edits the definition Sylius registered. A hookable is the service `sylius_twig_hooks.hook.<hook name>.hookable.<hookable name>`. To disable it, set its class to `Sylius\TwigHooks\Hookable\DisabledHookable` and its arguments to `[<hook name>, <hookable name>]`. A compiler pass also beats the application's config, so put it behind an option in the plugin's configuration when applications may want the original back.
+* **A runtime extension point.** For emails, a service tagged `sylius_mailer.email_modifier` that implements `Sylius\Component\Mailer\Modifier\EmailModifierInterface` can change the template for one email code. Decorating `sylius.email_sender` also works.
+
+### Prepended config and the plugin's own parameters
+
+Symfony resolves the `%parameters%` in each bundle's configuration when that bundle's extension loads, in `bundles.php` order (`MergeExtensionConfigurationPass`). The plugin's own parameters, such as `%your_plugin.model.thing.class%` from `registerResources()`, only exist once the plugin's `load()` has run. Prepended config that references them breaks the container when the receiving bundle is registered before the plugin:
+
+```
+You have requested a non-existent parameter "your_plugin.model.thing.class" while loading extension "sylius_grid".
+```
+
+* Use the interface or class name instead, as Sylius' own workflows do (`supports: Sylius\Component\Core\Model\OrderInterface`). `FrameworkBundle` and `DoctrineBundle` sit at the top of every application's `bundles.php`, so `framework` (workflows, Messenger) and `doctrine` config can't use plugin parameters at all.
+* For grids, ship a PHP grid class (next section). The grid bundle resolves its `%parameter%` resource class in a compiler pass, after every extension has loaded, so bundle order doesn't matter.
+* When prepended config has to reference a plugin parameter, the plugin must be registered before the receiving bundle. Say so in the README's installation steps, and register the plugin in that position in `tests/Application/config/bundles.php`.
+
+### Admin grids: PHP grid classes, not prepended arrays
+
+From `sylius/grid-bundle` 1.16, grids defined as arrays under `sylius_grid.grids` (YAML, or prepended from `prepend()`) are deprecated: `ArrayGridProvider::get()` triggers a deprecation each time such a grid is used. Sylius 2.3 requires grid-bundle `^1.16`, and its `UPGRADE-2.3.md` calls PHP grids "the direction of Sylius 3.0". Ship each admin grid as an invokable class with `#[AsGrid]`:
+
+```php
+use Sylius\Bundle\GridBundle\Builder\Action\CreateAction;
+use Sylius\Bundle\GridBundle\Builder\Action\DeleteAction;
+use Sylius\Bundle\GridBundle\Builder\Action\UpdateAction;
+use Sylius\Bundle\GridBundle\Builder\Field\StringField;
+use Sylius\Bundle\GridBundle\Builder\Filter\StringFilter;
+use Sylius\Component\Grid\Attribute\AsGrid;
+use Sylius\Component\Grid\Builder\GridBuilderInterface;
+
+interface ThingGridInterface
+{
+    public const NAME = 'your_plugin_admin_thing';
+
+    public function __invoke(GridBuilderInterface $gridBuilder): void;
+}
+
+#[AsGrid(resourceClass: '%your_plugin.model.thing.class%', name: self::NAME)]
+final class ThingGrid implements ThingGridInterface
+{
+    public function __invoke(GridBuilderInterface $gridBuilder): void
+    {
+        $gridBuilder
+            ->addField(StringField::create('code')->setLabel('sylius.ui.code')->setSortable(true))
+            ->addFilter(StringFilter::create('code')->setLabel('sylius.ui.code'))
+            ->withMainActions(CreateAction::create())
+            ->withItemActions(UpdateAction::create(), DeleteAction::create())
+        ;
+    }
+}
+```
+
+Register it explicitly, the way Sylius core registers its own grids:
+
+```php
+$services->set(ThingGrid::class)->tag('sylius.invokable_grid');
+$services->alias(ThingGridInterface::class, ThingGrid::class);
+```
+
+* **Require `sylius/grid-bundle: ^1.16`** in `require`. It installs on Sylius 2.0–2.2, which require `^1.13` (the skeleton resolves 1.16.1 with Sylius 2.2.13). 1.16 is the first version that resolves a `%parameter%` resource class: its `InvokableGridPass` copies the attribute's `resourceClass` into a service definition, and the container resolves the parameter at compile time. On 1.14 and 1.15, `AbstractGrid` reads `#[AsGrid]` by reflection at runtime, so the placeholder stays a literal string. Use the parameter rather than `Thing::class`, so applications can override the model class.
+* **Type-hint `Sylius\Component\Grid\Builder\GridBuilderInterface`.** grid-bundle 1.16 deprecates `Sylius\Bundle\GridBundle\Builder\GridBuilderInterface`, although Sylius 2.3's own grids still use it. The field, filter and action builders (`StringField`, `StringFilter`, `CreateAction`, …) stay in `Sylius\Bundle\GridBundle\Builder\…`.
+* **Bundle order doesn't matter.** Verified on Sylius 2.2.13 with grid-bundle 1.16.1 and the plugin registered last: the grid resolves its resource class and triggers no deprecation.
+* **Applications customise the grid with a grid mutator.** A mutator is a service that implements `Sylius\Component\Grid\Mutator\GridMutatorInterface`. In the application it's autoconfigured from `#[AsGridMutator(grid: ThingGridInterface::NAME)]`; without autoconfiguration, tag it `sylius.grid_mutator` with a `grid` attribute. Its `__invoke(GridBuilderInterface $gridBuilder)` adds, changes or removes fields, filters and actions. Mutators need grid-bundle 1.16 and apply whichever provider serves the grid. YAML doesn't merge into a PHP grid: on Sylius 2.2 the PHP grid wins and a YAML grid with the same name is ignored without a warning (`ServiceGridProvider` runs before `ArrayGridProvider`). On Sylius 2.3, `OverrideGridProvider` decorates the chain provider and, with the default `sylius_core.grid.use_legacy_config: true`, serves the YAML grid instead, which replaces the PHP grid wholesale.
+
+### Tell consumers in `UPGRADE.md`
+
+| `@YourPlugin/config/app/config.yaml` | Removed — the plugin's twig-hook configuration is now registered automatically via `YourExtension::prepend()`, and its grids are PHP classes. Drop the matching `imports:` entry from your `config/packages/your_plugin.yaml`. |
+| YAML overrides of the `your_plugin_admin_thing` grid | The grid is now the PHP class `YourPlugin\Grid\ThingGrid`, and YAML no longer merges into it. Move your changes to a grid mutator: a service implementing `Sylius\Component\Grid\Mutator\GridMutatorInterface` with `#[AsGridMutator(grid: 'your_plugin_admin_thing')]`. |
 
 CLAUDE.md guidance:
 
 ```
-- When the plugin needs to configure another bundle (`sylius_grid`,
-  `sylius_twig_hooks`, doctrine, etc.), do it from `YourExtension::prepend()`
-  via `$container->prependExtensionConfig(...)` with the config inlined as a
+- When the plugin needs to configure another bundle (`sylius_twig_hooks`,
+  doctrine, etc.), do it from `YourExtension::prepend()` via
+  `$container->prependExtensionConfig(...)` with the config inlined as a
   PHP array. Don't ship YAML files that consumers have to import.
+- Prepended config has the lowest precedence: it adds keys but can't change
+  or disable what Sylius' own config sets. For that, document app config in
+  the README, or use a compiler pass or a runtime extension point.
+- Keep the plugin's own %parameters% out of prepended config. If you can't,
+  the plugin must be registered before the receiving bundle in bundles.php,
+  and the README must say so.
+- Admin grids are `#[AsGrid]` PHP classes tagged `sylius.invokable_grid`,
+  with `resourceClass: '%your_plugin.model.<resource>.class%'`. Require
+  `sylius/grid-bundle: ^1.16`. Applications customise them with grid
+  mutators.
 ```
 
 ---
@@ -606,6 +677,8 @@ Key files to align with the skeleton:
 * `tests/Application/config/bundles.php` — every Sylius 2.x bundle plus your plugin. **Add `Sylius\TwigHooks\SyliusTwigHooksBundle`** if you use Twig hooks (the skeleton has it pre-registered).
 * `tests/Application/config/packages/*.yaml` — package configuration.
 * `tests/Application/public/index.php` — see §11b on the `HEADER_X_FORWARDED_ALL` removal.
+
+**Bundle order.** The skeleton registers the plugin last in `bundles.php`. That works as long as the plugin's prepended config doesn't reference the plugin's own `%parameters%` (§5). A plugin that still prepends a `sylius_grid` array grid with `%your_plugin.model.thing.class%` must be registered before `SyliusGridBundle`, or the container fails with "You have requested a non-existent parameter". Converting the grid to a PHP grid class (§5) removes that requirement. If some other prepended config has to reference a plugin parameter, register the plugin before the bundle that receives it, here and in the README's installation steps.
 
 Other key points:
 

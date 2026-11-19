@@ -108,7 +108,10 @@ Install these the first time a task needs them, then update this file: move the 
   - Service ids are the fully qualified class name, and the interface is registered as an alias of it. The ids Sylius generates for resources (`acme_sylius_example.factory.<resource>`) are the exception.
   - Decorate with an explicit priority and `service('.inner')`.
   - Call `registerForAutoconfiguration()` in the extension for the plugin's own extension-point interfaces, so implementations in the application get tagged.
-- **Configuring other bundles:** do it in the extension's `prepend()`, with the configuration inlined as PHP arrays passed to `prependExtensionConfig()`. That covers grids, Twig hooks, workflows and Messenger buses. Don't ship YAML that applications have to import, and don't read YAML from disk in `prepend()`.
+- **Configuring other bundles:**
+  - Do it in the extension's `prepend()`, with the configuration inlined as PHP arrays passed to `prependExtensionConfig()`. That covers Twig hooks, workflows and Messenger buses; grids are PHP classes (see [Sylius](#sylius)). Don't ship YAML that applications have to import, and don't read YAML from disk in `prepend()`.
+  - Prepended configuration has the lowest precedence. It adds new hookables, emails and workflows, but any value Sylius' own config or the application sets wins without a warning, including a hookable's template and `enabled: false`. To change what Sylius sets, document the application config in the README, edit Sylius' service definition from a compiler pass (a hookable is `sylius_twig_hooks.hook.<hook>.hookable.<name>`), or use a runtime extension point such as a `sylius_mailer.email_modifier` service.
+  - Bundles resolve the `%parameters%` in their configuration as they load, in `bundles.php` order, and the plugin's own parameters only exist after its `load()`. In prepended configuration, refer to models by interface or class name. When a plugin parameter is unavoidable, the plugin must be registered before the receiving bundle, and the README must say so. That never works for `framework` and `doctrine`, because their bundles are registered first.
 - **Classes:**
   - Controllers are single-action invokable `*Action` classes.
   - Twig extensions only declare functions and filters. The work happens in a lazy runtime (`[FooRuntime::class, 'method']`, tagged `twig.runtime`).
@@ -126,7 +129,10 @@ Install these the first time a task needs them, then update this file: move the 
 
 - **Resources:** when the plugin adds resources, extend `AbstractResourceBundle` and override `getConfigFilesPath()` to point at `config/doctrine/model`. Register the resources from a `resources` node in the configuration tree, using `registerResources()` in the extension.
 - **Factories:** never `new` a resource. Use the resource factory, and decorate `acme_sylius_example.factory.<resource>` when creation needs defaults.
-- **Grids** are prepended as PHP arrays. The plugin bundle must therefore be registered before `SyliusGridBundle` in `bundles.php`, and the README must say so.
+- **Grids:**
+  - Each admin grid is an invokable PHP class with `#[AsGrid(resourceClass: '%acme_sylius_example.model.<resource>.class%', name: self::NAME)]`, registered with the `sylius.invokable_grid` tag. Its interface holds the `NAME` constant, as in Sylius core. Type-hint `Sylius\Component\Grid\Builder\GridBuilderInterface`.
+  - Require `sylius/grid-bundle: ^1.16`. It deprecates array grids, and it's the first version that resolves the `%parameter%` resource class. Grids need no particular bundle order.
+  - Applications customise a PHP grid with a grid mutator (`GridMutatorInterface` plus `#[AsGridMutator(grid: …)]`), because YAML doesn't merge into it. The README of a plugin that ships a grid says so.
 - **Templates:**
   - Admin and shop templates are injected through Twig hooks, prepended under `sylius_twig_hooks`.
   - Admin menu entries come from a listener on `sylius.menu.admin.main`.
