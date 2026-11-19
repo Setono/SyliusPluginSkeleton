@@ -223,6 +223,6 @@ CI uses the `setono/sylius-plugin/*@v2` composite actions. Most jobs run a matri
 - **Dependency analysis.**
 - **Static code analysis:** PHPStan.
 - **Unit tests:** the `unit` suite.
-- **Functional tests:** highest dependencies only. Builds the assets, creates the MySQL schema, runs `doctrine:schema:validate`, loads the fixtures and runs the `functional` suite.
+- **Functional tests:** the same matrix, so the test application also boots on the lowest dependencies. Builds the assets, creates the MySQL schema, runs `doctrine:schema:validate`, loads the fixtures and runs the `functional` suite.
 - **Mutation tests:** Infection.
 - **Code coverage:** sets up the test application like the functional tests do (MySQL, assets, schema and fixtures), runs all PHPUnit suites with pcov and uploads the coverage to Codecov. Codecov's project and patch statuses fail below 90%.
