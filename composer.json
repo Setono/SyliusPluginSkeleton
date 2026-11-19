@@ -15,8 +15,10 @@
         "symfony/http-kernel": "^6.4 || ^7.4"
     },
     "require-dev": {
+        "api-platform/doctrine-orm": "^4.3",
         "api-platform/symfony": "^4.3.3",
         "gedmo/doctrine-extensions": "^3.22.2",
+        "knplabs/knp-menu-bundle": "^3.4.1",
         "payum/core": "^1.7.5",
         "setono/sylius-plugin": "^2.0",
         "sylius/grid-bundle": "^1.15",
