@@ -737,6 +737,12 @@ return (new Configuration())->addPathToExclude(__DIR__ . '/tests');
 CI (`.github/workflows/build.yaml`) — use the composite actions, matrix over PHP and Symfony:
 
 ```yaml
+on:
+    push:
+        branches: ["[0-9]+.x", "[0-9]+.[0-9]+.x"]
+    pull_request: ~
+    workflow_dispatch: ~
+
 jobs:
     backwards-compatibility:
         runs-on: ubuntu-latest
@@ -750,7 +756,7 @@ jobs:
     dependency-analysis:
         strategy:
             matrix:
-                php-version: ["8.2", "8.3", "8.4"]
+                php-version: ["8.2", "8.3", "8.4", "8.5"]
                 dependencies: ["lowest", "highest"]
                 symfony: ["~6.4.0", "~7.4.0"]
         steps:
@@ -762,8 +768,12 @@ jobs:
 
     static-code-analysis: { /* same matrix */ }
     unit-tests:           { /* same matrix */ }
-    # …functional-tests, mutation-tests, code-coverage
+    functional-tests:     { /* same matrix, plus node-version: "24" */ }
+    # …mutation-tests, code-coverage (also node-version: "24")
 ```
+
+* **Triggers:** limit `push` to version branches. `pull_request` already runs on every push to a pull request branch, so an unfiltered `push: ~` runs every job twice. Don't shorten the patterns to `"*.x"`: `*` also matches topic branches such as `fix-foo-2.2.x`. The patterns start with `[`, so YAML needs them quoted.
+* **Node:** pass `node-version: "24"` to `functional-tests` and `code-coverage`, the two actions that build the test application's assets. Their default is Node 20, which is end of life, and `@sylius-ui/admin` 2.3 refuses to install on it (it requires `^22.13.0 || >=24.0`).
 
 `composer.json` scripts:
 
@@ -807,13 +817,22 @@ Run `bin/console doctrine:schema:validate` after the conversion. Pay particular 
 
 ---
 
-## 11b. Deprecation sweeps: Symfony 7 and PHP 8.4
+## 11b. Deprecation sweeps: Symfony 7, PHP 8.4 and PHP 8.5
 
-The new CI matrix (PHP 8.2/8.3/8.4 × Symfony 6.4/7.4) catches things older toolchains hid. Sweep proactively:
+The new CI matrix (PHP 8.2/8.3/8.4/8.5 × Symfony 6.4/7.4) catches things older toolchains hid. Sweep proactively:
 
 * **`Request::HEADER_X_FORWARDED_ALL` removed in Symfony 6.0** — so it's absent on every supported version (`6.4` and `7.4`), and `HEADER_X_FORWARDED_ALL ^ HEADER_X_FORWARDED_HOST` fatals at runtime once `TRUSTED_PROXIES` is set. Replace it in `tests/Application/public/index.php` with the explicit bitmask `HEADER_X_FORWARDED_FOR | HEADER_X_FORWARDED_PORT | HEADER_X_FORWARDED_PROTO` (the skeleton already does this — mirror it).
 * **PHP 8.4 deprecates implicit nullable parameters.** `function foo(Foo $x = null)` now warns; rewrite to `function foo(?Foo $x = null)`. Rector can do this for you — run the dry-run before committing.
-* Run `composer phpstan` and `composer phpunit` against each matrix cell locally if you have the PHP versions installed, otherwise rely on CI.
+* **PHP 8.5 deprecates more legacy syntax and calls that no longer do anything.** The ones plugins are likely to hit:
+  * `setAccessible()` on `ReflectionProperty`, `ReflectionMethod` and the other Reflection classes, common in tests. It has had no effect since PHP 8.1, so delete the calls.
+  * The non-canonical casts `(boolean)`, `(integer)`, `(double)` and `(binary)`. Use `(bool)`, `(int)`, `(float)` and `(string)`.
+  * `null` as an array offset or as the key passed to `array_key_exists()`. Use `''`.
+  * The backtick operator. Call `shell_exec()`, or better, use `symfony/process`.
+  * `SplObjectStorage::attach()`, `detach()` and `contains()`. Use `offsetSet()`, `offsetUnset()` and `offsetExists()`.
+  * `curl_close()`, `finfo_close()`, `imagedestroy()` and `xml_parser_free()`. The handles are freed automatically, so delete the calls.
+  * The `PDO::MYSQL_ATTR_*` constants, replaced by `Pdo\Mysql::ATTR_*`. `Pdo\Mysql` only exists from PHP 8.4, so with an 8.2 floor pick the constant by `PHP_VERSION_ID`.
+  * `__sleep()` and `__wakeup()` are only soft-deprecated (no notice yet). Use `__serialize()` and `__unserialize()` in new code.
+* Run `composer analyse` and `composer phpunit` against each matrix cell locally if you have the PHP versions installed, otherwise rely on CI.
 
 ---
 
@@ -1038,7 +1057,7 @@ If you're driving this with an agent, here's an order that minimizes rebuild loo
 4. **Update `tests/Application/` in place** (§9) — diff against `Setono/SyliusPluginSkeleton`. Register `SyliusTwigHooksBundle` if relevant. Get `vendor/bin/phpunit --testsuite=functional` running with at least one trivial test.
 5. **Update tooling configs** (§10–11) — PHPStan, ECS, Rector, CI. Delete the old quality-pack files; add the new ones. Get them green.
 6. **Convert Doctrine PHPDoc mappings to attributes** (§11a) — run `doctrine:schema:validate` to confirm.
-7. **Sweep Symfony 7 / PHP 8.4 deprecations** (§11b).
+7. **Sweep Symfony 7 / PHP 8.4 / PHP 8.5 deprecations** (§11b).
 8. **Move bundle config to `prepend()`** (§5).
 9. **Rework routing** (§6).
 10. **Port templates to Twig hooks** (§7) — keep working `AbstractTypeExtension` form extensions; only port menu builders / template overrides. Verify each surface in Playwright.
