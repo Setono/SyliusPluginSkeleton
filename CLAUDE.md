@@ -202,7 +202,7 @@ Install these the first time a task needs them, then update this file: move the 
 - **Rector** `--dry-run` must be clean; CI fails otherwise.
 - **Code coverage** must be at least 90%, for the project and for the lines each change adds or modifies (`codecov.yml`). Like the Infection thresholds, the targets only go up and have no tolerance below them. The unit and functional suites both count, because CI measures coverage against the test application's database and fixtures. Browser tests don't count. Check coverage locally with `vendor/bin/phpunit --testsuite=unit,functional --coverage-text` (needs pcov or Xdebug, and the test application's database for the functional suite).
 - **Infection** runs only the `unit` suite (`testFrameworkOptions` in `infection.json5`), because the mutation-tests job has no database, assets or browsers. The thresholds only go up. The skeleton starts `minMsi` and `minCoveredMsi` at 100%. When tests raise the score, raise them in the same change, and never lower them to get a change through.
-  - Infection runs without `--with-uncovered`, so it mutates only code the unit suite covers. Code that only functional tests reach (a repository, a Doctrine listener) gets no mutants, and both scores stay at 100%.
+  - Infection runs without `--with-uncovered`, so it mutates only code the unit suite covers. Code that only functional tests reach (a repository, a Doctrine listener) gets no mutants, so neither score drops.
   - That code escapes mutation testing, so put logic worth mutating in services the unit suite covers.
 - **composer-dependency-analyser** runs with `require-dev` removed. Every package used in `src/` or `config/` must be in `require`, and every ignore needs a comment explaining why.
 - **Dev-only version pins:**
