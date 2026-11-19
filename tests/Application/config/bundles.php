@@ -58,5 +58,7 @@ return [
     Symfony\UX\Autocomplete\AutocompleteBundle::class => ['all' => true],
     Symfony\UX\StimulusBundle\StimulusBundle::class => ['all' => true],
     Sylius\Abstraction\StateMachine\SyliusStateMachineAbstractionBundle::class => ['all' => true],
+    // The plugin can stay last while its prepend() keeps its own %parameters% out of other bundles' configuration.
+    // Otherwise it must come before each bundle that receives them (see "Configuring other bundles" in CLAUDE.md).
     Acme\SyliusExamplePlugin\AcmeSyliusExamplePlugin::class => ['all' => true],
 ];
