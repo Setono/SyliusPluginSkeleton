@@ -13,10 +13,10 @@ Use this as a punch list. Skip what doesn't apply, but read every section before
 * `phpunit.xml.dist`, `phpstan.neon`, `ecs.php`, `rector.php`, `composer-dependency-analyser.php`, `infection.json5`
 * `.github/workflows/build.yaml`
 * Bundle `getPath()` override
-* The `setono/sylius-plugin: ^2.0` dev-dep and the `composer.json` `config` block
-* `tests/PHPStan/console_application.php`
+* The `composer.json` `require-dev` block (including the `setono/sylius-plugin: ^2.0` dev-dep), `scripts` block and `config` block
+* `CLAUDE.md`, which plugins generated from the skeleton inherit
 
-**Where this playbook and the skeleton diverge, the playbook calls it out explicitly.** The skeleton is the snapshot; the playbook reflects current Setono convention — when they conflict, follow the playbook.
+**Where this playbook and the skeleton diverge, the playbook calls it out explicitly**, and that guidance applies. Everywhere else, the skeleton and its `CLAUDE.md` are the source of truth, because CI runs against them: if a snippet here disagrees with the skeleton without saying so, follow the skeleton and report the mismatch in `Setono/SyliusPluginSkeleton`.
 
 ---
 
@@ -24,16 +24,18 @@ Use this as a punch list. Skip what doesn't apply, but read every section before
 
 Bump `composer.json` to the new floor. The Sylius 2.x ecosystem requires modern PHP and Symfony.
 
+The `require` block below is an example: list the packages your plugin's own code uses (`composer-dependency-analyser` checks that, see §10), with the skeleton's floors. The `require-dev` block is the skeleton's. Copy it from the skeleton's `composer.json` (it may have moved on since this was written), then add what your plugin's tests need on top.
+
 ```json
 "require": {
     "php": ">=8.2",
-    "sylius/channel": "^2.0",
-    "sylius/channel-bundle": "^2.0",
-    "sylius/core-bundle": "^2.0",
-    "sylius/product": "^2.0",
+    "sylius/channel": "^2.2",
+    "sylius/channel-bundle": "^2.2",
+    "sylius/core-bundle": "^2.2",
+    "sylius/product": "^2.2",
     "sylius/resource-bundle": "^1.12",
-    "sylius/taxonomy": "^2.0",
-    "sylius/ui-bundle": "^2.0",
+    "sylius/taxonomy": "^2.2",
+    "sylius/ui-bundle": "^2.2",
     "symfony/config":             "^6.4 || ^7.4",
     "symfony/console":            "^6.4 || ^7.4",
     "symfony/dependency-injection":"^6.4 || ^7.4",
@@ -46,12 +48,19 @@ Bump `composer.json` to the new floor. The Sylius 2.x ecosystem requires modern 
     "twig/twig": "^3.0"
 },
 "require-dev": {
-    "api-platform/core": "^4.0.3",
-    "lexik/jwt-authentication-bundle": "^3.1",
+    "api-platform/doctrine-orm": "^4.3",
+    "api-platform/symfony": "^4.3.3",
+    "gedmo/doctrine-extensions": "^3.22.2",
+    "knplabs/knp-menu-bundle": "^3.4.1",
+    "payum/core": "^1.7.5",
     "setono/sylius-plugin": "^2.0",
-    "sylius/sylius": "~2.2.5",
+    "sylius/grid-bundle": "^1.15",
+    "sylius/sylius": "~2.2.10",
+    "symfony/debug-bundle": "^6.4 || ^7.4",
     "symfony/dotenv": "^6.4 || ^7.4",
     "symfony/intl": "^6.4 || ^7.4",
+    "symfony/property-info": "^6.4 || ^7.4",
+    "symfony/serializer": "^6.4 || ^7.4",
     "symfony/var-exporter": "^6.4 || ^7.4",
     "symfony/web-profiler-bundle": "^6.4 || ^7.4",
     "symfony/webpack-encore-bundle": "^2.2"
@@ -61,9 +70,17 @@ Bump `composer.json` to the new floor. The Sylius 2.x ecosystem requires modern 
 Notes:
 
 * Drop PHP 7.x and 8.0/8.1 support entirely. PHP `>= 8.2` is the floor.
-* Drop Symfony `< 6.4`. Target `6.4 LTS` and `7.4+`.
-* Pin `sylius/sylius` to a concrete `~2.x.y` patch range in `require-dev` to keep the test app reproducible.
-* Cap `symfony/var-exporter` at `^6.4 || ^7.4` in `require-dev`. On PHP 8.4+ Composer otherwise resolves var-exporter 8, which has no LazyGhost, and every Doctrine command in the test app fails with "Symfony LazyGhost is not available". CI doesn't catch it, because it holds every Symfony package to one minor through `SYMFONY_REQUIRE`.
+* **Sylius 2.3 requires PHP `^8.3`** (Sylius 2.2 requires `^8.2`). A plugin that keeps the PHP 8.2 floor must keep allowing Sylius 2.2, and its PHP 8.2 CI lanes can only ever resolve Sylius 2.2.x. Raise the PHP floor to 8.3 in the same change that raises the Sylius floor to 2.3.
+* Drop Symfony `< 6.4`. Target the `6.4` and `7.4` LTS releases (`^6.4 || ^7.4` excludes 7.0–7.3).
+* Floor the Sylius packages at the minor the branch targets (`^2.2` on `2.2.x`, like the skeleton's `sylius/core-bundle`). The test app only runs that minor, but the static-code-analysis and dependency-analysis jobs install without `sylius/sylius`, so on lowest dependencies they resolve exactly that floor.
+* Pin `sylius/sylius` to the skeleton's `~2.x.y` patch range in `require-dev` to keep the test app reproducible. On `2.2.x` that's `~2.2.10`, the first release that conflicts with `doctrine/orm >= 3.7`, which rejects Sylius' `ShipmentUnit#shipment` mapping and fails `doctrine:schema:validate`.
+* Don't require `api-platform/core` or `lexik/jwt-authentication-bundle`. Sylius 2.2 uses API Platform's split packages (`api-platform/symfony`, `api-platform/doctrine-orm`, …), and `sylius/sylius` already requires `lexik/jwt-authentication-bundle: ^3.1`.
+* Several `require-dev` entries are floors that keep the test app booting, mostly on lowest dependencies. Keep them until the skeleton drops them:
+  * `api-platform/doctrine-orm: ^4.3` — `api-platform/symfony` 4.3 wires a class that `api-platform/doctrine-orm` only ships from 4.3, and nothing enforces the pairing.
+  * `gedmo/doctrine-extensions: ^3.22.2` — older versions declare a template bound that `symfony/type-info` >= 7.4.6 rejects, which breaks loading the API routes.
+  * `knplabs/knp-menu-bundle: ^3.4.1` — 3.4.0 doesn't register the `@KnpMenu` Twig namespace, so every admin page fails.
+  * `payum/core: ^1.7.5` — older versions aren't compatible with `psr/log` 3.
+  * `symfony/var-exporter: ^6.4 || ^7.4` — on PHP 8.4+ Composer otherwise resolves var-exporter 8, which has no LazyGhost, and every Doctrine command in the test app fails with "Symfony LazyGhost is not available". CI doesn't catch it, because it holds every Symfony package to one minor through `SYMFONY_REQUIRE`.
 * Pull dev tooling from `setono/sylius-plugin: ^2.0` (PHPStan, PHPUnit, Rector, ECS, Infection presets, GitHub composite actions, `shipmonk/composer-dependency-analyser`). This is the **single replacement** for the old `setono/code-quality-pack`.
 * Allow modern `doctrine/persistence` (`^4.0`) and other libs that bumped to support Symfony 7.
 
@@ -72,8 +89,8 @@ Document the new floor in `UPGRADE.md`:
 ```
 ### Requirements
 - PHP `>= 8.2`
-- Symfony `6.4` or `7.x`
-- Sylius `2.x`
+- Symfony `6.4` or `7.4`
+- Sylius `2.2` or newer
 
 The plugin no longer supports Sylius 1.x or PHP `< 8.2`.
 ```
@@ -594,7 +611,7 @@ Other key points:
 
 * Functional tests **require MySQL** — make this explicit in CLAUDE.md and CI.
 
-* API tests need `api-platform/core: ^4.0.3` and `lexik/jwt-authentication-bundle: ^3.1` in `require-dev`.
+* API tests need nothing beyond the skeleton's `require-dev` (§1): it has `api-platform/symfony` and `api-platform/doctrine-orm`, and `sylius/sylius` brings `lexik/jwt-authentication-bundle`.
 
 * `dama/doctrine-test-bundle: ^8.6` is **optional** — useful for transactional DB isolation in functional tests if you have many of them; the skeleton doesn't require it. Add it when test-isolation pain is real, not preemptively. If you add it, register the PHPUnit extension in `phpunit.xml.dist`:
 
@@ -659,7 +676,6 @@ And to **add**:
 * `composer-dependency-analyser.php` — replaces require-checker + composer-unused
 * `phpstan.neon` — replaces psalm
 * `infection.json5` — replaces `infection.json.dist`
-* `tests/PHPStan/console_application.php` — referenced by `phpstan.neon`'s `symfony.consoleApplicationLoader`
 * `.github/workflows/build.yaml` — single workflow using the composite actions
 
 `phpstan.neon`:
@@ -670,31 +686,42 @@ parameters:
     paths: [src, tests]
     excludePaths: [tests/Application/*]
     bootstrapFiles: [tests/Application/config/bootstrap.php]
-    symfony:
-        consoleApplicationLoader: tests/PHPStan/console_application.php
     doctrine:
         repositoryClass: Doctrine\ORM\EntityRepository
     reportUnmatchedIgnoredErrors: false
     treatPhpDocTypesAsCertain: false
-    ignoreErrors:
-        - { identifier: missingType.generics }
-        - { identifier: missingType.iterableValue }
 ```
+
+* **No `symfony.consoleApplicationLoader` and no `doctrine.objectManagerLoader`.** Both boot the test application, which the static-code-analysis job can't do: it removes `sylius/sylius` before installing, so the test app's bundles are missing. phpstan-symfony only calls the console loader when it analyses a `Command` subclass, so nothing fails until the plugin adds its first console command, and then only in CI, with `Internal error: Class "Symfony\Bundle\MonologBundle\MonologBundle" not found`. Without the loader, `InputInterface::getOption()` and `getArgument()` return `mixed`, and level max makes the command narrow them (e.g. with `Assert::string()`). If the plugin has a `tests/PHPStan/console_application.php` from an earlier version of this playbook, delete it together with the loader.
+* **No `ignoreErrors` and no baseline.** Fix `missingType.generics` and `missingType.iterableValue` errors by declaring the generic and iterable types. When an ignore is unavoidable, scope it to the error identifier and the line, with a comment saying why: `// @phpstan-ignore missingType.generics (reason)`.
 
 `ecs.php`:
 
 ```php
 return static function (ECSConfig $config): void {
     $config->import('vendor/sylius-labs/coding-standard/ecs.php');
-    $config->paths(['src', 'tests', 'composer-dependency-analyser.php', 'ecs.php', 'rector.php']);
-    $config->skip(['tests/Application/**']);
+    $config->paths([
+        'src',
+        'tests',
+        'composer-dependency-analyser.php',
+        'rector.php',
+    ]);
+    $config->skip([
+        // Generated (and gitignored): Symfony 7.4 writes it whenever it builds the debug container
+        'tests/Application/config/reference.php',
+        'tests/Application/node_modules/**',
+        'tests/Application/var/**',
+    ]);
 };
 ```
+
+Unlike PHPStan and Rector, ECS checks the test application's own PHP files (`Kernel.php`, `config/bootstrap.php`, …). Skip only what's generated or installed there, not all of `tests/Application/`.
 
 `rector.php` (target the same PHP floor you committed to):
 
 ```php
 return static function (RectorConfig $rectorConfig): void {
+    $rectorConfig->cacheDirectory('./.build/rector');
     $rectorConfig->paths([__DIR__ . '/src', __DIR__ . '/tests']);
     $rectorConfig->skip([__DIR__ . '/tests/Application']);
     $rectorConfig->sets([LevelSetList::UP_TO_PHP_82]);
@@ -742,27 +769,16 @@ jobs:
 
 ```json
 "scripts": {
-    "analyse":           "phpstan analyse",
-    "check-style":       "ecs check",
-    "fix-style":         "ecs check --fix",
-    "phpunit":           "phpunit --testsuite unit,functional",
-    "phpunit:functional":"phpunit --testsuite functional",
-    "phpunit:unit":      "phpunit --testsuite unit"
+    "analyse": "phpstan analyse",
+    "check-style": "ecs check",
+    "fix-style": "ecs check --fix",
+    "phpunit": "phpunit"
 }
 ```
 
-Code-quality CLAUDE.md section:
+`composer phpunit` runs every suite in `phpunit.xml.dist`. Run a single suite with `vendor/bin/phpunit --testsuite=unit` (or `functional`), as the skeleton's `CLAUDE.md` documents, rather than adding a script per suite.
 
-```
-## Code Quality
-- PHP >=8.2, targeting Symfony 6.4/7.4
-- Dev tooling (PHPStan, PHPUnit, Rector, ECS, Infection) comes from `setono/sylius-plugin`
-- PHPStan at `level: max` with Sylius/Symfony/Doctrine/PHPUnit/strict-rules extensions
-- ECS imports `sylius-labs/coding-standard`
-- All tools skip `tests/Application/`
-- `declare(strict_types=1);` required in all PHP files
-- CI uses the `setono/sylius-plugin/*@v2` composite GitHub Actions
-```
+Code-quality section of CLAUDE.md: take the **Quality Gates** section from the skeleton's `CLAUDE.md` rather than writing your own, so the plugin's rules match what its CI enforces. In particular, PHPStan runs without a baseline or global ignores, and not every tool skips `tests/Application/`: ECS checks the test app's PHP files.
 
 ---
 
@@ -1019,7 +1035,7 @@ If you're driving this with an agent, here's an order that minimizes rebuild loo
 1. **Bump `composer.json`** (§1) — get the dependency graph resolving on the new floor before touching code.
 2. **Move files** (§2) — `Resources/` → repo root in one mechanical pass; update `getPath()` **and** `getConfigFilesPath()`.
 3. **Convert DI to PHP DSL** (§3) — file-by-file. Keep service ids identical for now.
-4. **Update `tests/Application/` in place** (§9) — diff against `Setono/SyliusPluginSkeleton`. Register `SyliusTwigHooksBundle` if relevant. Get `composer phpunit:functional` running with at least one trivial test.
+4. **Update `tests/Application/` in place** (§9) — diff against `Setono/SyliusPluginSkeleton`. Register `SyliusTwigHooksBundle` if relevant. Get `vendor/bin/phpunit --testsuite=functional` running with at least one trivial test.
 5. **Update tooling configs** (§10–11) — PHPStan, ECS, Rector, CI. Delete the old quality-pack files; add the new ones. Get them green.
 6. **Convert Doctrine PHPDoc mappings to attributes** (§11a) — run `doctrine:schema:validate` to confirm.
 7. **Sweep Symfony 7 / PHP 8.4 deprecations** (§11b).
