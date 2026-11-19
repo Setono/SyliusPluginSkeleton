@@ -596,12 +596,20 @@ Other key points:
 
 * API tests need `api-platform/core: ^4.0.3` and `lexik/jwt-authentication-bundle: ^3.1` in `require-dev`.
 
-* `dama/doctrine-test-bundle: ^8.6` is **optional** — useful for transactional DB isolation in functional tests if you have many of them; the skeleton doesn't require it. Add it when test-isolation pain is real, not preemptively. If you add it, register the PHPUnit extension in `phpunit.xml.dist`:
+* `dama/doctrine-test-bundle: ^8.6` is **optional** — it runs each test in a transaction that is rolled back; the skeleton doesn't require it. Add it once tests write to the database (browser tests usually do, §16), not preemptively. If you add it, register `DAMA\DoctrineTestBundle\DAMADoctrineTestBundle::class => ['test' => true]` in `tests/Application/config/bundles.php` and the PHPUnit extension in `phpunit.xml.dist`:
 
     ```xml
     <extensions>
         <bootstrap class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension"/>
     </extensions>
+    ```
+
+    DAMA also needs savepoints for the transactions nested in each test's transaction. Sylius 2.2 requires DBAL 3, where they are opt-in, and without them the test app's container doesn't compile ("This bundle relies on savepoints for nested database transactions"). Keep `use_savepoints: true` under `doctrine.dbal` in `tests/Application/config/packages/doctrine.yaml`, which the skeleton sets already:
+
+    ```yaml
+    doctrine:
+        dbal:
+            use_savepoints: true
     ```
 
 * The skeleton splits `phpunit.xml.dist` into `unit` and `functional` test suites so unit tests stay fast and CLI-friendly without booting MySQL. Mirror that split: keep kernel-free logic under `tests/Unit/` and anything that boots the app (and therefore needs MySQL) under `tests/Functional/`:
@@ -618,6 +626,10 @@ Other key points:
         </testsuites>
     </phpunit>
     ```
+
+* A plugin with UI surfaces adds a third suite, `browser` (`tests/Browser/`, playwright-symfony), with its first UI change (§16). The skeleton ships without it; its `CLAUDE.md` ("Add when needed" → "Browser tests") governs the setup, including the CI job.
+
+* The CI jobs pick their suites. The mutation-tests job has no MySQL, assets or browsers, so the skeleton's `infection.json5` limits Infection's initial run to `unit` (`"testFrameworkOptions": "--testsuite=unit"`). Infection runs without `--with-uncovered`, so code that only functional tests reach (repositories, Doctrine listeners) gets no mutants, and `minMsi` and `minCoveredMsi` both stay at 100. Code coverage counts `unit` and `functional`; once a `browser` suite exists, pass `testsuite: "unit,functional"` to the `code-coverage` job, which installs no browsers.
 
 Booting the test app locally (document this verbatim in CLAUDE.md):
 
@@ -904,21 +916,28 @@ Both stay in the unit suite — no kernel boot, no MySQL.
 
 ---
 
-## 16. UI verification with Playwright
+## 16. UI verification with browser tests
 
-For any UI change (admin form, grid, page), boot the test app and verify in a browser via the Playwright MCP. Don't rely on PHPStan/PHPUnit alone — Twig hook wiring fails silently and only shows in the rendered DOM.
+Cover every UI change (admin form, grid, page) with a browser test in `tests/Browser/`, and look at a screenshot of each page it changes before reporting the work as done. The unit and functional suites, PHPStan and ECS aren't enough — Twig hook wiring fails silently and only shows in the rendered page.
+
+Browser tests use [playwright-php/playwright-symfony](https://github.com/playwright-php/playwright-symfony) in a third PHPUnit suite, `browser` (§9). Add the suite with the plugin's first UI change. The skeleton's `CLAUDE.md` ("Add when needed" → "Browser tests") governs the setup: installing the bundle and Chromium, `/bundles` assets, and the CI job. Why browser tests rather than checking by hand or through the Playwright MCP:
+
+* **They stay.** CI runs them on every build, so the check keeps holding after the change. A manual or MCP check happens once and leaves nothing behind.
+* **They're always there.** playwright-symfony is a dev dependency of the plugin, so every contributor and agent has it. The MCP exists only where a developer installed it.
+* **They see the test's data.** playwright-symfony handles the browser's requests in the test's own kernel, inside the DAMA transaction (§9), so a test sets up exactly the case it checks.
+* **They give screenshots too.** `$page->screenshot()` shows what the page looks like. Pass it an absolute path, because the Playwright server resolves a relative one against its own working directory.
 
 CLAUDE.md guidance:
 
 ```
 - When you build or change a feature with a UI surface (admin form, grid, page),
-  verify it via the Playwright MCP — boot the test app (see "Booting the test app
-  locally"), navigate to the affected page, and confirm the rendered output
-  before reporting the task as complete. Don't rely on PHPUnit/PHPStan/ECS alone
-  for UI work.
+  cover it with a browser test in `tests/Browser/`, and look at a screenshot of
+  each page it changes (`$page->screenshot()`, absolute path) before reporting the
+  task as complete. Don't rely on the unit and functional suites, PHPStan or ECS
+  for UI work: Twig hook wiring fails silently and only the rendered page shows it.
 ```
 
-Companion tips that save real time when working with the test app server:
+When you also run the test app server by hand, these tips save real time:
 
 ```
 - Before running `symfony server:start`, run `symfony server:status` first — the
@@ -1025,13 +1044,13 @@ If you're driving this with an agent, here's an order that minimizes rebuild loo
 7. **Sweep Symfony 7 / PHP 8.4 deprecations** (§11b).
 8. **Move bundle config to `prepend()`** (§5).
 9. **Rework routing** (§6).
-10. **Port templates to Twig hooks** (§7) — keep working `AbstractTypeExtension` form extensions; only port menu builders / template overrides. Verify each surface in Playwright.
+10. **Port templates to Twig hooks** (§7) — keep working `AbstractTypeExtension` form extensions; only port menu builders / template overrides. Cover each surface with a browser test (§16).
 11. **Migrate admin `CollectionType` fields to `LiveCollectionType`** (§7a) — needed for any plugin that ships an inline collection in the admin product/variant form.
 12. **Switch service ids to FQCN** (§4) — touch only services you're already modifying. Catch known Sylius core renames (`sylius.integer_distributor` → `sylius.distributor.integer`).
 13. **Migrate Doctrine call sites to `ManagerRegistry`** (§8).
 14. **Pin behavior changes intentionally** (§17), update `UPGRADE.md` (§18) and `README.md` continuously.
 15. **Translate into all target locales** (§13) — add or refresh `translations/<domain>.<locale>.yaml` for every locale in the target set, not just English.
-16. **Final pass**: `composer fix-style && composer analyse && composer phpunit` clean, Playwright green on every UI surface, CI green on the full matrix.
+16. **Final pass**: `composer fix-style && composer analyse && composer phpunit` clean (`phpunit` runs the `browser` suite too), a browser test for every UI surface (§16), CI green on the full matrix.
 
 ---
 
@@ -1046,5 +1065,5 @@ If you're driving this with an agent, here's an order that minimizes rebuild loo
 * **Don't rewrite working `AbstractTypeExtension` form extensions as Twig hook subscribers.** Sylius 2.x core still uses form extensions — the hook only positions the rendered field (§7).
 * Don't migrate an admin `CollectionType` to v2 without switching `getParent()` to `LiveCollectionType` — the Add/Delete buttons silently break (§7a).
 * Don't leave Doctrine PHPDoc mappings (`@ORM\OneToMany`) in entities or traits — ORM 3 ignores them silently and inverse-side associations stop wiring (§11a).
-* Don't claim a UI change works because PHPUnit passes. Twig hook misconfiguration only surfaces in a real browser (§16).
+* Don't claim a UI change works because the unit and functional suites pass. Twig hook misconfiguration only surfaces in a real browser, so cover it with a browser test (§16).
 * Don't ship the major release with unresolved PHPStan or ECS errors — the matrix CI will catch them on a PHP/Symfony combination you didn't test locally.
