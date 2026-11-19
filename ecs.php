@@ -13,6 +13,8 @@ return static function (ECSConfig $config): void {
         'rector.php',
     ]);
     $config->skip([
+        // Generated (and gitignored): Symfony 7.4 writes it whenever it builds the debug container
+        'tests/Application/config/reference.php',
         'tests/Application/node_modules/**',
         'tests/Application/var/**',
     ]);
