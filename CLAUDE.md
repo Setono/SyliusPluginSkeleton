@@ -216,7 +216,7 @@ Whenever you add, rename or remove a key, do it in every locale file in the same
 
 ## CI
 
-CI uses the `setono/sylius-plugin/*@v2` composite actions. Most jobs run a matrix of PHP 8.2/8.3/8.4 × Symfony ~6.4/~7.4 × lowest/highest dependencies. The jobs are:
+CI uses the `setono/sylius-plugin/*@v2` composite actions. The `build` workflow runs on pull requests and on pushes to version branches only (`[0-9]+.x` and `[0-9]+.[0-9]+.x`), because an unfiltered push trigger runs every job twice on a pull request. Most jobs run a matrix of PHP 8.2/8.3/8.4/8.5 × Symfony ~6.4/~7.4 × lowest/highest dependencies. The jobs that build the test application's assets pass `node-version: "24"`, because the actions default to Node 20, which `@sylius-ui/admin` 2.3 rejects. The jobs are:
 
 - **Backwards compatibility:** Roave BC check, pull requests only.
 - **Coding standards:** composer validate/normalize, ECS, Rector, `lint:yaml`, `lint:twig`, and `symfony lsp:check` (because `.symfony-lsp.json` exists).

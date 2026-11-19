@@ -1,7 +1,12 @@
 name: "build"
 
 on:
-    push: ~
+    # Pushes to pull request branches are covered by pull_request, so a push trigger without a filter would run
+    # every job twice. The patterns match version branches (2.2.x, 3.x) but not topic branches like fix-2.2.x
+    push:
+        branches:
+            - "[0-9]+.x"
+            - "[0-9]+.[0-9]+.x"
     pull_request: ~
     workflow_dispatch: ~
 
@@ -22,7 +27,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-version: ["8.2", "8.3", "8.4"]
+                php-version: ["8.2", "8.3", "8.4", "8.5"]
                 dependencies: ["lowest", "highest"]
                 symfony: ["~6.4.0", "~7.4.0"]
         steps:
@@ -37,7 +42,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-version: ["8.2", "8.3", "8.4"]
+                php-version: ["8.2", "8.3", "8.4", "8.5"]
                 dependencies: ["lowest", "highest"]
                 symfony: ["~6.4.0", "~7.4.0"]
         steps:
@@ -52,7 +57,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-version: ["8.2", "8.3", "8.4"]
+                php-version: ["8.2", "8.3", "8.4", "8.5"]
                 dependencies: ["lowest", "highest"]
                 symfony: ["~6.4.0", "~7.4.0"]
         steps:
@@ -68,7 +73,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-version: ["8.2", "8.3", "8.4"]
+                php-version: ["8.2", "8.3", "8.4", "8.5"]
                 dependencies: ["lowest", "highest"]
                 symfony: ["~6.4.0", "~7.4.0"]
         steps:
@@ -77,6 +82,9 @@ jobs:
                     php-version: "${{ matrix.php-version }}"
                     dependencies: "${{ matrix.dependencies }}"
                     symfony: "${{ matrix.symfony }}"
+                    # The action defaults to Node 20, which is end of life and which @sylius-ui/admin 2.3 rejects
+                    # (it requires ^22.13.0 || >=24.0). Sylius runs its own frontend builds on Node 24
+                    node-version: "24"
                     testsuite: "functional"
     
     mutation-tests:
@@ -92,4 +100,6 @@ jobs:
             -   uses: "setono/sylius-plugin/code-coverage@v2"
                 with:
                     symfony: "~7.4.0"
+                    # Builds the test application's assets like the functional tests, so it needs the same Node version
+                    node-version: "24"
                     codecov-token: "${{ secrets.CODECOV_TOKEN }}"
