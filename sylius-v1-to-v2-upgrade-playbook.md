@@ -52,6 +52,7 @@ Bump `composer.json` to the new floor. The Sylius 2.x ecosystem requires modern 
     "sylius/sylius": "~2.2.5",
     "symfony/dotenv": "^6.4 || ^7.4",
     "symfony/intl": "^6.4 || ^7.4",
+    "symfony/var-exporter": "^6.4 || ^7.4",
     "symfony/web-profiler-bundle": "^6.4 || ^7.4",
     "symfony/webpack-encore-bundle": "^2.2"
 }
@@ -62,6 +63,7 @@ Notes:
 * Drop PHP 7.x and 8.0/8.1 support entirely. PHP `>= 8.2` is the floor.
 * Drop Symfony `< 6.4`. Target `6.4 LTS` and `7.4+`.
 * Pin `sylius/sylius` to a concrete `~2.x.y` patch range in `require-dev` to keep the test app reproducible.
+* Cap `symfony/var-exporter` at `^6.4 || ^7.4` in `require-dev`. On PHP 8.4+ Composer otherwise resolves var-exporter 8, which has no LazyGhost, and every Doctrine command in the test app fails with "Symfony LazyGhost is not available". CI doesn't catch it, because it holds every Symfony package to one minor through `SYMFONY_REQUIRE`.
 * Pull dev tooling from `setono/sylius-plugin: ^2.0` (PHPStan, PHPUnit, Rector, ECS, Infection presets, GitHub composite actions, `shipmonk/composer-dependency-analyser`). This is the **single replacement** for the old `setono/code-quality-pack`.
 * Allow modern `doctrine/persistence` (`^4.0`) and other libs that bumped to support Symfony 7.
 
