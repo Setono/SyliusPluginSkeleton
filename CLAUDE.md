@@ -56,7 +56,6 @@ This is a Symfony bundle structured as a Sylius 2 plugin, with `config/`, `templ
 - `tests/Unit/` — Unit tests (e.g. `tests/Unit/DependencyInjection/` for the DI extension)
 - `tests/Functional/` — Functional tests that boot the test application
 - `tests/Application/` — Full Symfony/Sylius app used for functional testing (Kernel, config, database)
-- `tests/PHPStan/` — Loaders PHPStan uses to boot the test application
 - `.symfony-lsp.json` — Points `symfony lsp:check` at the repository root and names the test application's kernel
 
 ## Workflow
