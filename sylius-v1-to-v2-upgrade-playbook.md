@@ -305,15 +305,17 @@ If you renamed routes (e.g. moved to `/ajax`), document each rename — consumer
 
 ## 7. Templates: rebuild around Sylius Twig hooks
 
-Sylius 2.x replaced direct template overriding with [Twig hooks](https://docs.sylius.com/the-customization-guide/customization/twig-hooks). What changes vs. what stays:
+Sylius 2.x replaced direct template overriding with [Twig hooks](https://docs.sylius.com/the-customization-guide/customization/twig-hooks) on admin and shop pages. The admin main menu, the shop account menu and emails still work as in 1.x. What changes vs. what stays:
 
 * **Template overrides** (`templates/bundles/SyliusAdminBundle/...`) — port to hook templates registered via `sylius_twig_hooks`.
-* **Menu builders / `AdminMenuListener`** — gone in 2.x. Migrate to a Twig hook on the admin menu hookpoint.
-* **Form extensions (`AbstractTypeExtension`)** — **keep them**. Sylius 2.x core itself still uses `AbstractTypeExtension` (e.g. `ChannelPricingType` extends the variant form, then is _placed_ into the admin form via a Twig hook). The form extension still does the schema work; the Twig hook only positions the rendered widget in the UI. Don't rewrite working extensions as hook subscribers.
+* **Admin main-menu listeners** — **keep them**. Sylius 2.x still builds the admin sidebar with KnpMenu and dispatches `sylius.menu.admin.main` (`Sylius\Bundle\UiBundle\Menu\Event\MenuBuilderEvent`) once its own items are in. There is no Twig hook inside the menu tree. Sylius 2.3 builds the menu from services tagged `sylius_admin.main_menu_provider` (`Sylius\Bundle\AdminBundle\Menu\Provider\MenuProviderInterface`), but its last provider, `EventMenuProvider`, still dispatches the event, so listeners need no changes. Switch to a tagged provider only when the plugin requires Sylius 2.3. The shop account menu works the same way through `sylius.menu.shop.account`.
+* **Page menu builders** (`ProductFormMenuBuilder`, `ProductUpdateMenuBuilder`, `ProductVariantFormMenuBuilder`, `OrderShowMenuBuilder`, `CustomerShowMenuBuilder`, `PromotionUpdateMenuBuilder`) — removed in 2.0, and nothing dispatches their events any more. Port listeners on them to hooks on that page, e.g. a tab under `sylius_admin.product.update.content.form.side_navigation`.
+* **Emails** — no hooks. No Sylius 2 email template has a hookpoint, so emails are still customised by swapping the template. The application does that with `sylius_mailer.emails.<code>.template` or an override under `templates/bundles/`. A plugin can't change a core email's template from `prepend()`, because Sylius imports its own `sylius_mailer` config as application config, which wins over prepended config. A plugin instead swaps the template or subject in an email modifier (`Sylius\Component\Mailer\Modifier\EmailModifierInterface`, tagged `sylius_mailer.email_modifier`), changes the outgoing message in a `sylius.email_send.pre_send` listener, or decorates `sylius.email_sender`. Emails the plugin adds get their own code under `sylius_mailer.emails`, which `prepend()` can ship.
+* **Form extensions (`AbstractTypeExtension`)** — **keep them**, and give every field they add a hookable that renders it. Sylius 2.x core itself still uses form extensions (e.g. `ProductVariantTypeExtension` adds the `channelPricings` field, and hookables render it in the admin variant form). The form extension still does the schema work, but the hookable is what outputs the field. Admin and shop templates end forms with `form_end(form, {render_rest: false})`, and the admin and shop form themes override `form_end` to output only the CSRF token, so nothing renders leftover fields. A field no hookable renders never reaches the page. If it carries a constraint (e.g. `IsTrue` on a checkbox), every submission fails with an error nobody sees. Don't rewrite working extensions as hook subscribers.
 
 ### Required bundle: `SyliusTwigHooksBundle`
 
-Twig hooks come from the `sylius/twig-hooks` package, registered as `Sylius\TwigHooks\SyliusTwigHooksBundle` in `tests/Application/config/bundles.php`. The skeleton has it pre-registered. If your test app doesn't, hook templates silently fail to render.
+Twig hooks come from the `sylius/twig-hooks` package, registered as `Sylius\TwigHooks\SyliusTwigHooksBundle` in `tests/Application/config/bundles.php`. The skeleton has it pre-registered. A test app without it fails loudly: the container doesn't compile, because the Sylius admin and shop config it imports declares hooks under `sylius_twig_hooks`, and any template that uses `{% hook %}` fails with `Unknown "hook" tag`.
 
 ### Canonical hook names (admin product form)
 
@@ -1025,7 +1027,7 @@ If you're driving this with an agent, here's an order that minimizes rebuild loo
 7. **Sweep Symfony 7 / PHP 8.4 deprecations** (§11b).
 8. **Move bundle config to `prepend()`** (§5).
 9. **Rework routing** (§6).
-10. **Port templates to Twig hooks** (§7) — keep working `AbstractTypeExtension` form extensions; only port menu builders / template overrides. Verify each surface in Playwright.
+10. **Port templates to Twig hooks** (§7) — keep working `AbstractTypeExtension` form extensions and `sylius.menu.admin.main` listeners; only port template overrides and page menu builders. Verify each surface in Playwright.
 11. **Migrate admin `CollectionType` fields to `LiveCollectionType`** (§7a) — needed for any plugin that ships an inline collection in the admin product/variant form.
 12. **Switch service ids to FQCN** (§4) — touch only services you're already modifying. Catch known Sylius core renames (`sylius.integer_distributor` → `sylius.distributor.integer`).
 13. **Migrate Doctrine call sites to `ManagerRegistry`** (§8).
@@ -1043,7 +1045,7 @@ If you're driving this with an agent, here's an order that minimizes rebuild loo
 * Don't keep YAML config files that `prepend()` could ship inline (§5).
 * Don't ship XML service configuration — convert to PHP DSL (§3).
 * **Don't wipe and replace `tests/Application/`.** You'll lose the plugin-specific test wiring (custom entities mixing in plugin traits, fixtures, route references). Diff in place against the skeleton (§9).
-* **Don't rewrite working `AbstractTypeExtension` form extensions as Twig hook subscribers.** Sylius 2.x core still uses form extensions — the hook only positions the rendered field (§7).
+* **Don't rewrite working `AbstractTypeExtension` form extensions as Twig hook subscribers.** Sylius 2.x core still uses form extensions. Do give each field they add a hookable that renders it, though: admin and shop forms don't render leftover fields, so without one the field never reaches the page (§7).
 * Don't migrate an admin `CollectionType` to v2 without switching `getParent()` to `LiveCollectionType` — the Add/Delete buttons silently break (§7a).
 * Don't leave Doctrine PHPDoc mappings (`@ORM\OneToMany`) in entities or traits — ORM 3 ignores them silently and inverse-side associations stop wiring (§11a).
 * Don't claim a UI change works because PHPUnit passes. Twig hook misconfiguration only surfaces in a real browser (§16).
