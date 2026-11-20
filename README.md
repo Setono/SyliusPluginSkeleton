@@ -41,6 +41,31 @@ Enjoy!
 
 To be able to set up a plugin's database, remember to configure you database credentials in `tests/Application/.env` and `tests/Application/.env.test`.
 
+## Installation
+
+The plugin ships no Flex recipe, so an application installs it with these steps.
+
+1. Require the plugin:
+
+    ```shell
+    composer require setono/sylius-plugin-skeleton
+    ```
+
+2. Register the plugin in `config/bundles.php`:
+
+    ```php
+    Acme\SyliusExamplePlugin\AcmeSyliusExamplePlugin::class => ['all' => true],
+    ```
+
+3. Import the plugin's routes in `config/routes/acme_sylius_example.yaml`:
+
+    ```yaml
+    acme_sylius_example:
+        resource: "@AcmeSyliusExamplePlugin/config/routes.yaml"
+    ```
+
+    If your shop doesn't use localised URLs, import `@AcmeSyliusExamplePlugin/config/routes_no_locale.yaml` instead.
+
 [ico-version]: https://poser.pugx.org/setono/sylius-plugin-skeleton/v/stable
 [ico-license]: https://poser.pugx.org/setono/sylius-plugin-skeleton/license
 [ico-github-actions]: https://github.com/Setono/SyliusPluginSkeleton/workflows/build/badge.svg
