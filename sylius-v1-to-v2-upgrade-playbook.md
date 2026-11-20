@@ -877,6 +877,12 @@ jobs:
 
 Code-quality section of CLAUDE.md: take the **Quality Gates** section from the skeleton's `CLAUDE.md` rather than writing your own, so the plugin's rules match what its CI enforces. In particular, PHPStan runs without a baseline or global ignores, and not every tool skips `tests/Application/`: ECS checks the test app's PHP files.
 
+`.gitattributes`: mirror the skeleton's. It export-ignores every root-level dev file, so the dist archive ships only what the plugin needs at runtime. Without the update, the plugin's archive ships the new dev files.
+
+* **Add** `export-ignore` lines for the new dev files: `/composer-dependency-analyser.php`, `/phpstan.neon`, `/infection.json5`, and `/CLAUDE.md` and `/.symfony-lsp.json` once the plugin has them.
+* **Drop** the lines for the files you deleted, such as `/composer-require-checker.json`, `/composer-unused.php`, `/psalm.xml`, `/psalm-baseline.xml` and `/infection.json.dist`. Stale lines do no harm, but they hide which dev files the plugin really has.
+* **Check** a path with `git check-attr export-ignore -- <path>`, which reads the working tree's `.gitattributes`. `git archive HEAD | tar -t` lists what the last commit ships.
+
 ---
 
 ## 11. Required `declare(strict_types=1);`

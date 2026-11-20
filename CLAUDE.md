@@ -33,6 +33,8 @@ vendor/bin/infection                         # mutation testing
 symfony lsp:check                            # Symfony-aware diagnostics for the plugin and its test app (needs Symfony CLI >= 5.20)
 composer validate --strict                   # validate composer.json
 composer normalize --dry-run                 # check composer.json normalization
+git check-attr export-ignore -- <path>       # is the path left out of the dist archive?
+git archive HEAD | tar -t                    # list what the last commit's dist archive ships
 
 # Test application (run from the repository root)
 tests/Application/bin/console <command>
@@ -67,6 +69,7 @@ This is a Symfony bundle structured as a Sylius 2 plugin, with `config/`, `templ
 - Commit subjects are imperative, sentence case and describe the outcome ("Require gedmo/doctrine-extensions ^3.22.2"), without Conventional Commit prefixes. The body explains why and links upstream issues or PRs.
 - When behaviour that users see changes (new features, configuration keys, removed UI), update `README.md` to describe the current state. The plugin ships no Flex recipe, so the README documents every installation step.
 - When a change requires plugin users to act during an upgrade (renamed or removed classes, services, templates or config keys, changed defaults), document it in `UPGRADE.md` under the relevant "Upgrading from X to Y" section.
+- `.gitattributes` export-ignores every root-level file and directory that only serves development (tool configs, docs, `tests/`), so the dist archive holds only what the plugin needs at runtime. When you add, rename or remove one, update `.gitattributes` in the same change, and check it with the `git check-attr` command under [Commands](#commands).
 - Keep this file current. When you install a tool, add a dependency that changes how things are done, or establish a new convention, update CLAUDE.md in the same change.
 - Use relative paths in shell commands; absolute paths inside the working directory trigger permission prompts.
 - Shell tools: `fd` to find files, `rg` to search text, `ast-grep` for syntax-aware code search, `jq` for JSON (never Python), `yq` for YAML and XML.
