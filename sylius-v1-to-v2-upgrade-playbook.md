@@ -28,14 +28,14 @@ The `require` block below is an example: list the packages your plugin's own cod
 
 ```json
 "require": {
-    "php": ">=8.2",
-    "sylius/channel": "^2.2",
-    "sylius/channel-bundle": "^2.2",
-    "sylius/core-bundle": "^2.2",
-    "sylius/product": "^2.2",
+    "php": ">=8.3",
+    "sylius/channel": "^2.3",
+    "sylius/channel-bundle": "^2.3",
+    "sylius/core-bundle": "^2.3",
+    "sylius/product": "^2.3",
     "sylius/resource-bundle": "^1.12",
-    "sylius/taxonomy": "^2.2",
-    "sylius/ui-bundle": "^2.2",
+    "sylius/taxonomy": "^2.3",
+    "sylius/ui-bundle": "^2.3",
     "symfony/config":             "^6.4 || ^7.4",
     "symfony/console":            "^6.4 || ^7.4",
     "symfony/dependency-injection":"^6.4 || ^7.4",
@@ -52,10 +52,12 @@ The `require` block below is an example: list the packages your plugin's own cod
     "api-platform/symfony": "^4.3.3",
     "gedmo/doctrine-extensions": "^3.22.2",
     "knplabs/knp-menu-bundle": "^3.4.1",
+    "liip/imagine-bundle": "^2.17.1",
     "payum/core": "^1.7.5",
     "setono/sylius-plugin": "^2.0",
+    "sylius/fixtures-bundle": "^1.10.1",
     "sylius/grid-bundle": "^1.15",
-    "sylius/sylius": "~2.2.10",
+    "sylius/sylius": "~2.3.3",
     "symfony/debug-bundle": "^6.4 || ^7.4",
     "symfony/dotenv": "^6.4 || ^7.4",
     "symfony/intl": "^6.4 || ^7.4",
@@ -69,17 +71,19 @@ The `require` block below is an example: list the packages your plugin's own cod
 
 Notes:
 
-* Drop PHP 7.x and 8.0/8.1 support entirely. PHP `>= 8.2` is the floor.
+* Drop PHP 7.x and 8.0/8.1 support entirely. The skeleton's floor is PHP `>= 8.3`, because Sylius 2.3 requires it.
 * **Sylius 2.3 requires PHP `^8.3`** (Sylius 2.2 requires `^8.2`). A plugin that keeps the PHP 8.2 floor must keep allowing Sylius 2.2, and its PHP 8.2 CI lanes can only ever resolve Sylius 2.2.x. Raise the PHP floor to 8.3 in the same change that raises the Sylius floor to 2.3.
 * Drop Symfony `< 6.4`. Target the `6.4` and `7.4` LTS releases (`^6.4 || ^7.4` excludes 7.0–7.3).
-* Floor the Sylius packages at the minor the branch targets (`^2.2` on `2.2.x`, like the skeleton's `sylius/core-bundle`). The test app only runs that minor, but the static-code-analysis and dependency-analysis jobs install without `sylius/sylius`, so on lowest dependencies they resolve exactly that floor.
-* Pin `sylius/sylius` to the skeleton's `~2.x.y` patch range in `require-dev` to keep the test app reproducible. On `2.2.x` that's `~2.2.10`, the first release that conflicts with `doctrine/orm >= 3.7`, which rejects Sylius' `ShipmentUnit#shipment` mapping and fails `doctrine:schema:validate`.
-* Don't require `api-platform/core` or `lexik/jwt-authentication-bundle`. Sylius 2.2 uses API Platform's split packages (`api-platform/symfony`, `api-platform/doctrine-orm`, …), and `sylius/sylius` already requires `lexik/jwt-authentication-bundle: ^3.1`.
+* Floor the Sylius packages at the minor the branch targets (`^2.3` on `2.3.x`, like the skeleton's `sylius/core-bundle`). The test app only runs that minor, but the static-code-analysis and dependency-analysis jobs install without `sylius/sylius`, so on lowest dependencies they resolve exactly that floor.
+* Pin `sylius/sylius` to the skeleton's `~2.x.y` patch range in `require-dev` to keep the test app reproducible. On `2.3.x` that's `~2.3.3`. On the frozen `2.2.x` it's `~2.2.10`, the first release that conflicts with `doctrine/orm >= 3.7`, which rejects Sylius' `ShipmentUnit#shipment` mapping and fails `doctrine:schema:validate`.
+* Don't require `api-platform/core` or `lexik/jwt-authentication-bundle`. Sylius 2 uses API Platform's split packages (`api-platform/symfony`, `api-platform/doctrine-orm`, …), and `sylius/sylius` already requires `lexik/jwt-authentication-bundle: ^3.1`.
 * Several `require-dev` entries are floors that keep the test app booting, mostly on lowest dependencies. Keep them until the skeleton drops them:
   * `api-platform/doctrine-orm: ^4.3` — `api-platform/symfony` 4.3 wires a class that `api-platform/doctrine-orm` only ships from 4.3, and nothing enforces the pairing.
   * `gedmo/doctrine-extensions: ^3.22.2` — older versions declare a template bound that `symfony/type-info` >= 7.4.6 rejects, which breaks loading the API routes.
   * `knplabs/knp-menu-bundle: ^3.4.1` — 3.4.0 doesn't register the `@KnpMenu` Twig namespace, so every admin page fails.
+  * `liip/imagine-bundle: ^2.17.1` — Sylius 2.3 allows 2.17.0, whose `liip_imagine.binary.locator.asset_mapper` template service isn't abstract, so `lint:container` (which the functional-tests job runs) fails ("accepts AssetMapperInterface, string passed").
   * `payum/core: ^1.7.5` — older versions aren't compatible with `psr/log` 3.
+  * `sylius/fixtures-bundle: ^1.10.1` — Sylius 2.3 allows 1.10.0, which uses Monolog 3's `Monolog\Level` while still allowing Monolog 2, so on lowest dependencies the test app fails to boot with `Class "Monolog\Level" not found`.
   * `symfony/var-exporter: ^6.4 || ^7.4` — on PHP 8.4+ Composer otherwise resolves var-exporter 8, which has no LazyGhost, and every Doctrine command in the test app fails with "Symfony LazyGhost is not available". CI doesn't catch it, because it holds every Symfony package to one minor through `SYMFONY_REQUIRE`.
 * Pull dev tooling from `setono/sylius-plugin: ^2.0` (PHPStan, PHPUnit, Rector, ECS, Infection presets, GitHub composite actions, `shipmonk/composer-dependency-analyser`). This is the **single replacement** for the old `setono/code-quality-pack`.
 * Allow modern `doctrine/persistence` (`^4.0`) and other libs that bumped to support Symfony 7.
@@ -88,11 +92,11 @@ Document the new floor in `UPGRADE.md`:
 
 ```
 ### Requirements
-- PHP `>= 8.2`
+- PHP `>= 8.3`
 - Symfony `6.4` or `7.4`
-- Sylius `2.2` or newer
+- Sylius `2.3` or newer
 
-The plugin no longer supports Sylius 1.x or PHP `< 8.2`.
+The plugin no longer supports Sylius 1.x or PHP `< 8.3`.
 ```
 
 ---
@@ -696,7 +700,7 @@ Other key points:
     </extensions>
     ```
 
-    DAMA also needs savepoints for the transactions nested in each test's transaction. Without them the test app's container doesn't compile ("This bundle relies on savepoints for nested database transactions"). Sylius 2.2 requires DBAL 3, where savepoints are opt-in through `doctrine.dbal.use_savepoints: true`. DBAL 4 always uses them, and DoctrineBundle 3, which Sylius 2.3 allows, rejects the key ('Unrecognized option "use_savepoints"'). So don't put the key in `doctrine.yaml`. Copy the skeleton's `tests/Application/config/packages/doctrine_savepoints.php`, which sets it only when DBAL 3 is installed.
+    DAMA also needs savepoints for the transactions nested in each test's transaction. Without them the test app's container doesn't compile ("This bundle relies on savepoints for nested database transactions"). Sylius 2.3 allows DBAL 3, where savepoints are opt-in through `doctrine.dbal.use_savepoints: true`, and DBAL 4, which always uses them. DoctrineBundle 3, which needs DBAL 4, rejects the key ('Unrecognized option "use_savepoints"'). So don't put the key in `doctrine.yaml`. Copy the skeleton's `tests/Application/config/packages/doctrine_savepoints.php`, which sets it only when DBAL 3 is installed.
 
 * The skeleton splits `phpunit.xml.dist` into `unit` and `functional` test suites so unit tests stay fast and CLI-friendly without booting MySQL. Mirror that split: keep kernel-free logic under `tests/Unit/` and anything that boots the app (and therefore needs MySQL) under `tests/Functional/`:
 
@@ -837,7 +841,7 @@ jobs:
     dependency-analysis:
         strategy:
             matrix:
-                php-version: ["8.2", "8.3", "8.4", "8.5"]
+                php-version: ["8.3", "8.4", "8.5"]
                 dependencies: ["lowest", "highest"]
                 symfony: ["~6.4.0", "~7.4.0"]
         steps:
@@ -906,7 +910,7 @@ Run `bin/console doctrine:schema:validate` after the conversion. Pay particular 
 
 ## 11b. Deprecation sweeps: Symfony 7, PHP 8.4 and PHP 8.5
 
-The new CI matrix (PHP 8.2/8.3/8.4/8.5 × Symfony 6.4/7.4) catches things older toolchains hid. Sweep proactively:
+The new CI matrix (PHP 8.3/8.4/8.5 × Symfony 6.4/7.4) catches things older toolchains hid. Sweep proactively:
 
 * **`Request::HEADER_X_FORWARDED_ALL` removed in Symfony 6.0** — so it's absent on every supported version (`6.4` and `7.4`), and `HEADER_X_FORWARDED_ALL ^ HEADER_X_FORWARDED_HOST` fatals at runtime once `TRUSTED_PROXIES` is set. Replace it in `tests/Application/public/index.php` with the explicit bitmask `HEADER_X_FORWARDED_FOR | HEADER_X_FORWARDED_PORT | HEADER_X_FORWARDED_PROTO` (the skeleton already does this — mirror it).
 * **PHP 8.4 deprecates implicit nullable parameters.** `function foo(Foo $x = null)` now warns; rewrite to `function foo(?Foo $x = null)`. Rector can do this for you — run the dry-run before committing.
@@ -917,7 +921,7 @@ The new CI matrix (PHP 8.2/8.3/8.4/8.5 × Symfony 6.4/7.4) catches things older 
   * The backtick operator. Call `shell_exec()`, or better, use `symfony/process`.
   * `SplObjectStorage::attach()`, `detach()` and `contains()`. Use `offsetSet()`, `offsetUnset()` and `offsetExists()`.
   * `curl_close()`, `finfo_close()`, `imagedestroy()` and `xml_parser_free()`. The handles are freed automatically, so delete the calls.
-  * The `PDO::MYSQL_ATTR_*` constants, replaced by `Pdo\Mysql::ATTR_*`. `Pdo\Mysql` only exists from PHP 8.4, so with an 8.2 floor pick the constant by `PHP_VERSION_ID`.
+  * The `PDO::MYSQL_ATTR_*` constants, replaced by `Pdo\Mysql::ATTR_*`. `Pdo\Mysql` only exists from PHP 8.4, so with an 8.3 floor pick the constant by `PHP_VERSION_ID`.
   * `__sleep()` and `__wakeup()` are only soft-deprecated (no notice yet). Use `__serialize()` and `__unserialize()` in new code.
 * Run `composer analyse` and `composer phpunit` against each matrix cell locally if you have the PHP versions installed, otherwise rely on CI.
 

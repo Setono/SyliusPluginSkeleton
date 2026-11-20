@@ -2,7 +2,7 @@ name: "build"
 
 on:
     # Pushes to pull request branches are covered by pull_request, so a push trigger without a filter would run
-    # every job twice. The patterns match version branches (2.2.x, 3.x) but not topic branches like fix-2.2.x
+    # every job twice. The patterns match version branches (2.3.x, 3.x) but not topic branches like fix-2.3.x
     push:
         branches:
             - "[0-9]+.x"
@@ -27,7 +27,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-version: ["8.2", "8.3", "8.4", "8.5"]
+                php-version: ["8.3", "8.4", "8.5"]
                 dependencies: ["lowest", "highest"]
                 symfony: ["~6.4.0", "~7.4.0"]
         steps:
@@ -42,7 +42,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-version: ["8.2", "8.3", "8.4", "8.5"]
+                php-version: ["8.3", "8.4", "8.5"]
                 dependencies: ["lowest", "highest"]
                 symfony: ["~6.4.0", "~7.4.0"]
         steps:
@@ -57,7 +57,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-version: ["8.2", "8.3", "8.4", "8.5"]
+                php-version: ["8.3", "8.4", "8.5"]
                 dependencies: ["lowest", "highest"]
                 symfony: ["~6.4.0", "~7.4.0"]
         steps:
@@ -73,7 +73,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-version: ["8.2", "8.3", "8.4", "8.5"]
+                php-version: ["8.3", "8.4", "8.5"]
                 dependencies: ["lowest", "highest"]
                 symfony: ["~6.4.0", "~7.4.0"]
         steps:

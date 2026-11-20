@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Setono Sylius Plugin Skeleton — a template for creating Sylius e-commerce plugins. PHP 8.2+, Symfony 6.4/7.4, Sylius 2.2+. After cloning, run `php init` to interactively rename all placeholder names (Acme/Example) to your vendor/plugin names. Plugins generated from the skeleton inherit this file, so everything below applies to them as well.
+Setono Sylius Plugin Skeleton — a template for creating Sylius e-commerce plugins. PHP 8.3+, Symfony 6.4/7.4, Sylius 2.3+. After cloning, run `php init` to interactively rename all placeholder names (Acme/Example) to your vendor/plugin names. Plugins generated from the skeleton inherit this file, so everything below applies to them as well.
 
 ## Commands
 
@@ -64,7 +64,7 @@ This is a Symfony bundle structured as a Sylius 2 plugin, with `config/`, `templ
 
 - Never commit or push unless explicitly asked. A request to commit applies to that change only, not to later ones.
 - Before each commit, run `composer fix-style`, `composer analyse` and `composer phpunit` and fix what they flag. Don't commit on top of failures, and never weaken a gate to get green: no PHPStan baselines, no lowered thresholds, no `--no-verify`.
-- Branches mirror Sylius versions (`2.2.x`, …). Pull requests target the matching version branch, so always pass `--base` to `gh pr create`.
+- Branches mirror Sylius versions (`2.3.x`, …). Pull requests target the matching version branch, so always pass `--base` to `gh pr create`.
 - Merge pull requests with a merge commit (`gh pr merge --merge --delete-branch`), not a squash.
 - Commit subjects are imperative, sentence case and describe the outcome ("Require gedmo/doctrine-extensions ^3.22.2"), without Conventional Commit prefixes. The body explains why and links upstream issues or PRs.
 - When behaviour that users see changes (new features, configuration keys, removed UI), update `README.md` to describe the current state. The plugin ships no Flex recipe, so the README documents every installation step.
@@ -92,7 +92,7 @@ Install these the first time a task needs them, then update this file: move the 
     - Pass `testsuite: "unit,functional"` to the `code-coverage` job, which installs no browsers.
 - **Database writes in tests:** install `dama/doctrine-test-bundle` so each test runs in a transaction that is rolled back.
   - Register `DAMA\DoctrineTestBundle\DAMADoctrineTestBundle::class => ['test' => true]` in `tests/Application/config/bundles.php`, and its PHPUnit extension (`<bootstrap class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension"/>`) in `phpunit.xml.dist`.
-  - The bundle needs savepoints, and without them the container doesn't compile. DBAL 4 always uses them. On DBAL 3, which Sylius 2.2 requires, they are opt-in, so the test application's `config/packages/doctrine_savepoints.php` sets `use_savepoints: true`, but only there: DoctrineBundle 3, which Sylius 2.3 allows, rejects the key.
+  - The bundle needs savepoints, and without them the container doesn't compile. Sylius 2.3 allows DBAL 3, where savepoints are opt-in, and DBAL 4, where they are always on and DoctrineBundle 3 rejects the `use_savepoints` key. So the test application's `config/packages/doctrine_savepoints.php` sets `use_savepoints: true` only on DBAL 3.
 - **Doctrine in services:** require `setono/doctrine-orm-trait`. Inject `ManagerRegistry` and use `Setono\Doctrine\ORMTrait` instead of injecting `EntityManagerInterface`.
 - **Composite services** (several implementations behind one interface, collected by tag): require `setono/composite-compiler-pass` and register its compiler pass in the bundle's `build()`.
 
@@ -108,7 +108,7 @@ Install these the first time a task needs them, then update this file: move the 
 - Services that memoize per request implement `Symfony\Contracts\Service\ResetInterface` and are tagged `kernel.reset`, so long-running workers don't leak state.
 - Comments explain why, not what. Don't write docblocks that only repeat the signature. Never commit debug calls (`dump`, `dd`, `var_dump`, `print_r`, `exit`).
 - Follow clean code and SOLID principles: small classes with one responsibility, composition over inheritance, meaningful names.
-- Style is enforced by ECS using `sylius-labs/coding-standard`; Rector enforces PHP 8.2 level modernization. Code must run on the PHP floor in `composer.json` (8.2).
+- Style is enforced by ECS using `sylius-labs/coding-standard`; Rector enforces PHP 8.3 level modernization. Code must run on the PHP floor in `composer.json` (8.3).
 - Bundle naming follows the `{Vendor}Sylius{Name}Plugin` convention, and the DI extension alias uses snake_case (e.g., `acme_sylius_example`).
 
 ## Symfony
@@ -238,7 +238,7 @@ Whenever you add, rename or remove a key, do it in every locale file in the same
 
 ## CI
 
-CI uses the `setono/sylius-plugin/*@v2` composite actions. The `build` workflow runs on pull requests and on pushes to version branches only (`[0-9]+.x` and `[0-9]+.[0-9]+.x`), because an unfiltered push trigger runs every job twice on a pull request. Most jobs run a matrix of PHP 8.2/8.3/8.4/8.5 × Symfony ~6.4/~7.4 × lowest/highest dependencies. The jobs that build the test application's assets pass `node-version: "24"`, because the actions default to Node 20, which `@sylius-ui/admin` 2.3 rejects. The jobs are:
+CI uses the `setono/sylius-plugin/*@v2` composite actions. The `build` workflow runs on pull requests and on pushes to version branches only (`[0-9]+.x` and `[0-9]+.[0-9]+.x`), because an unfiltered push trigger runs every job twice on a pull request. Most jobs run a matrix of PHP 8.3/8.4/8.5 × Symfony ~6.4/~7.4 × lowest/highest dependencies. The jobs that build the test application's assets pass `node-version: "24"`, because the actions default to Node 20, which `@sylius-ui/admin` 2.3 rejects. The jobs are:
 
 - **Backwards compatibility:** Roave BC check, pull requests only.
 - **Coding standards:** composer validate/normalize, ECS, Rector, `lint:yaml`, `lint:twig`, and `symfony lsp:check` (because `.symfony-lsp.json` exists).
