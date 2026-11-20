@@ -92,7 +92,7 @@ Install these the first time a task needs them, then update this file: move the 
     - Pass `testsuite: "unit,functional"` to the `code-coverage` job, which installs no browsers.
 - **Database writes in tests:** install `dama/doctrine-test-bundle` so each test runs in a transaction that is rolled back.
   - Register `DAMA\DoctrineTestBundle\DAMADoctrineTestBundle::class => ['test' => true]` in `tests/Application/config/bundles.php`, and its PHPUnit extension (`<bootstrap class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension"/>`) in `phpunit.xml.dist`.
-  - The bundle needs `use_savepoints: true`, which the test application's `doctrine.yaml` already sets. DBAL 3, which Sylius 2.2 requires, makes savepoints opt-in, and without them the container doesn't compile.
+  - The bundle needs savepoints, and without them the container doesn't compile. DBAL 4 always uses them. On DBAL 3, which Sylius 2.2 requires, they are opt-in, so the test application's `config/packages/doctrine_savepoints.php` sets `use_savepoints: true`, but only there: DoctrineBundle 3, which Sylius 2.3 allows, rejects the key.
 - **Doctrine in services:** require `setono/doctrine-orm-trait`. Inject `ManagerRegistry` and use `Setono\Doctrine\ORMTrait` instead of injecting `EntityManagerInterface`.
 - **Composite services** (several implementations behind one interface, collected by tag): require `setono/composite-compiler-pass` and register its compiler pass in the bundle's `build()`.
 

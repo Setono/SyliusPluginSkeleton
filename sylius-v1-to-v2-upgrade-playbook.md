@@ -696,13 +696,7 @@ Other key points:
     </extensions>
     ```
 
-    DAMA also needs savepoints for the transactions nested in each test's transaction. Sylius 2.2 requires DBAL 3, where they are opt-in, and without them the test app's container doesn't compile ("This bundle relies on savepoints for nested database transactions"). Keep `use_savepoints: true` under `doctrine.dbal` in `tests/Application/config/packages/doctrine.yaml`, which the skeleton sets already:
-
-    ```yaml
-    doctrine:
-        dbal:
-            use_savepoints: true
-    ```
+    DAMA also needs savepoints for the transactions nested in each test's transaction. Without them the test app's container doesn't compile ("This bundle relies on savepoints for nested database transactions"). Sylius 2.2 requires DBAL 3, where savepoints are opt-in through `doctrine.dbal.use_savepoints: true`. DBAL 4 always uses them, and DoctrineBundle 3, which Sylius 2.3 allows, rejects the key ('Unrecognized option "use_savepoints"'). So don't put the key in `doctrine.yaml`. Copy the skeleton's `tests/Application/config/packages/doctrine_savepoints.php`, which sets it only when DBAL 3 is installed.
 
 * The skeleton splits `phpunit.xml.dist` into `unit` and `functional` test suites so unit tests stay fast and CLI-friendly without booting MySQL. Mirror that split: keep kernel-free logic under `tests/Unit/` and anything that boots the app (and therefore needs MySQL) under `tests/Functional/`:
 
