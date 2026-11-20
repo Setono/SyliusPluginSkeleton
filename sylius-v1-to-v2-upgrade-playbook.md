@@ -836,7 +836,7 @@ jobs:
 
     coding-standards:
         runs-on: ubuntu-latest
-        steps: [{ uses: setono/sylius-plugin/coding-standards@v2 }]
+        steps: [{ uses: setono/sylius-plugin/coding-standards@v2, with: { php-version: "8.3" } }]
 
     dependency-analysis:
         strategy:
@@ -858,6 +858,7 @@ jobs:
 ```
 
 * **Triggers:** limit `push` to version branches. `pull_request` already runs on every push to a pull request branch, so an unfiltered `push: ~` runs every job twice. Don't shorten the patterns to `"*.x"`: `*` also matches topic branches such as `fix-foo-2.2.x`. The patterns start with `[`, so YAML needs them quoted.
+* **PHP:** pass `php-version: "8.3"` to `coding-standards`. It installs the plugin's dependencies on its default PHP 8.2, which can't install Sylius 2.3. `backwards-compatibility` also defaults to 8.2 but installs none, and `mutation-tests` and `code-coverage` default to 8.3.
 * **Node:** pass `node-version: "24"` to `functional-tests` and `code-coverage`, the two actions that build the test application's assets. Their default is Node 20, which is end of life, and `@sylius-ui/admin` 2.3 refuses to install on it (it requires `^22.13.0 || >=24.0`).
 
 `composer.json` scripts:
