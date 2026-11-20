@@ -56,8 +56,6 @@ The `require` block below is an example: list the packages your plugin's own cod
     "setono/sylius-plugin": "^2.0",
     "sylius/grid-bundle": "^1.15",
     "sylius/sylius": "~2.2.10",
-    "symfony/browser-kit": "^6.4 || ^7.4",
-    "symfony/css-selector": "^6.4 || ^7.4",
     "symfony/debug-bundle": "^6.4 || ^7.4",
     "symfony/dotenv": "^6.4 || ^7.4",
     "symfony/intl": "^6.4 || ^7.4",
@@ -641,7 +639,7 @@ The rules for the plugin's side live in the skeleton's `CLAUDE.md` under "Admin 
    * `tests/Application/package.json` — adds `@sylius/admin-bundle`, which holds Sylius' `controllers.json` and controllers.
    * `tests/Application/config/packages/webpack_encore.yaml` and `assets.yaml` — register the `app.admin` build.
    * `tests/Application/config/packages/sylius_twig_hooks.yaml` and `tests/Application/templates/admin/{stylesheets,javascripts}.html.twig` — load both entries into the `sylius_admin.base#stylesheets` and `#javascripts` hooks.
-3. Cover what the controllers do with browser tests (§16). The functional suite only shows that the page references the entry, not that a controller connects.
+3. Cover what the controllers do with browser tests (§16).
 4. Tell applications to import the entrypoint in the README's installation steps, as the skeleton's README does:
 
     ```js

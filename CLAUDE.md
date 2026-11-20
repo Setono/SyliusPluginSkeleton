@@ -177,7 +177,6 @@ Install these the first time a task needs them, then update this file: move the 
   - DI extension: `Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase`.
   - Configuration: `Matthias\SymfonyConfigTest\PhpUnit\ConfigurationTestCaseTrait`.
   - Kernel and web tests: call `restore_exception_handler()` in `tearDown()`.
-  - Server-side assertions on admin pages that need no JavaScript (status codes, the rendered HTML): extend `WebTestCase` and log in with `$client->loginUser($administrator, 'admin')`, using the fixtures' administrator `sylius@example.com` (see `tests/Functional/AdminAssetsTest.php`). UI behaviour still needs a browser test (see UI verification below).
   - Constraint validators: `ConstraintValidatorTestCase`.
 - **Console commands:** follow https://symfony.com/doc/current/console.html#testing-commands.
   - **Functional tests:** extend `KernelTestCase` and create `new Application(self::$kernel)`, using the FrameworkBundle `Application`. Get the command with `$application->find('<command name>')` and run it with `CommandTester::execute()`.
