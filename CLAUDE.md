@@ -148,7 +148,11 @@ Install these the first time a task needs them, then update this file: move the 
   - Admin and shop templates are injected through Twig hooks, prepended under `sylius_twig_hooks`.
   - Admin menu entries come from a listener on `sylius.menu.admin.main`.
   - Template directories and file names are snake_case.
-  - The shop UI uses Bootstrap 5, `ux_icon('tabler:…')` icons and plain JavaScript in `public/`, with no build step.
+  - The shop UI uses Bootstrap 5 and `ux_icon('tabler:…')` icons.
+- **JavaScript:** admin and shop JavaScript is plain JavaScript in `public/`, with no build step and no Stimulus controllers, so applications never import plugin assets or rebuild theirs.
+  - `assets:install`, which Symfony Flex applications run on `composer install`, copies `public/` to `public/bundles/<bundle>/`, where `<bundle>` is the bundle class name in lowercase.
+  - Load a script with a `<script>` tag using `asset('bundles/<bundle>/…')`, in a template hooked into the pages that need it. Use a page's own hook (e.g. `sylius_admin.product.update#javascripts`) over `sylius_admin.base#javascripts` or `sylius_shop.base#javascripts`, which load on every page.
+  - Attach event listeners to `document` rather than to elements, so they keep working after a Live Component re-renders its part of the page.
 - **Extending core entities:** ship an interface plus a trait (the trait carries `#[ORM\…]` attributes) and document in the README how to add them to the application's entity.
 
 ## Doctrine

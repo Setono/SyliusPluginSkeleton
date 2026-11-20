@@ -621,7 +621,7 @@ The Live actions only dispatch if the surrounding form is a Live Component. Syli
         component: 'sylius_admin:product:form'
 ```
 
-Plugins hooking into the product form get add/remove for free. Plugins hooking into a **non-**Live-Component form must either expose their own component or fall back to a custom Stimulus controller. Don't reach for `LiveCollectionType` somewhere it can't work.
+Plugins hooking into the product form get add/remove for free. Plugins hooking into a **non-**Live-Component form must either expose their own component or add and remove rows with plain JavaScript. Ship the script in the plugin's `public/` directory and load it from a template hooked into the form's page, as the skeleton's `CLAUDE.md` describes under "JavaScript". A Stimulus controller would need every application to import and build the plugin's assets. Don't reach for `LiveCollectionType` somewhere it can't work.
 
 ---
 
