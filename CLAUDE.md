@@ -56,7 +56,6 @@ This is a Symfony bundle structured as a Sylius 2 plugin, with `config/`, `templ
 - `tests/Unit/` — Unit tests (e.g. `tests/Unit/DependencyInjection/` for the DI extension)
 - `tests/Functional/` — Functional tests that boot the test application
 - `tests/Application/` — Full Symfony/Sylius app used for functional testing (Kernel, config, database)
-- `tests/PHPStan/` — Loaders PHPStan uses to boot the test application
 - `.symfony-lsp.json` — Points `symfony lsp:check` at the repository root and names the test application's kernel
 
 ## Workflow
@@ -76,13 +75,21 @@ This is a Symfony bundle structured as a Sylius 2 plugin, with `config/`, `templ
 
 Install these the first time a task needs them, then update this file: move the entry into the section it belongs to, and add its commands to [Commands](#commands).
 
-- **Browser tests:** install [playwright-php/playwright-symfony](https://github.com/playwright-php/playwright-symfony) and use it rather than Panther or a JavaScript Playwright suite.
-  - Run `composer require --dev playwright-php/playwright-symfony`, then `vendor/bin/playwright-install --browsers`.
+- **Browser tests:** install [playwright-php/playwright-symfony](https://github.com/playwright-php/playwright-symfony) with the plugin's first UI change (see [UI verification](#testing)), and use it rather than Panther or a JavaScript Playwright suite.
+  - Run `composer require --dev playwright-php/playwright-symfony`, then `vendor/bin/playwright-install chromium` (its default browser).
   - Register `Playwright\Symfony\PlaywrightSymfonyBundle::class => ['test' => true]` in `tests/Application/config/bundles.php`.
   - Tests extend `Playwright\Symfony\Test\PlaywrightTestCase`. Put them in `tests/Browser/` with a `browser` testsuite in `phpunit.xml.dist`.
+  - The test's own kernel handles the browser's requests, with no web server, so a test sees the data it creates. Install the database-writes bundle below along with it.
   - Specs discover their subjects (products, customers) from the fixtures instead of hardcoding ids. Elements they need get hooks through `{{ sylius_test_html_attribute('name', value) }}`, never a raw `data-test-*` attribute.
-  - Make sure CI runs the suite. The `setono/sylius-plugin` actions don't install Playwright browsers yet.
+  - Pass `$page->screenshot()` an absolute path. The Playwright server resolves a relative one against its own working directory.
+  - **Bundle assets:** the asset bridge serves only the URL prefixes in `playwright.assets.prefixes` (default `/assets`, `/build` and `/_framework/ux`). When the plugin ships files in `public/`, add `/bundles` to the list in `tests/Application/config/packages/playwright.yaml`. Before the suite runs, locally and in CI, copy the files with `tests/Application/bin/console assets:install`, and copy them again after they change. A `--symlink` install serves nothing, because the bridge skips files that resolve outside the test app's `public/`.
+  - **CI:** add a `browser-tests` job to `.github/workflows/build.yaml`.
+    - Start it with `setono/sylius-plugin/functional-tests@v2` without a `testsuite`. The action then only sets up the test application (MySQL, Node, `yarn build`, schema and fixtures).
+    - Then run `assets:install` (when the plugin ships public files), `vendor/bin/playwright-install --with-deps chromium` and `vendor/bin/phpunit --testsuite=browser`. Set `APP_ENV: "test"` and the action's `DATABASE_URL` (`mysql://root:root@127.0.0.1/sylius?serverVersion=8.0`) in the job's `env`.
+    - Pass `testsuite: "unit,functional"` to the `code-coverage` job, which installs no browsers.
 - **Database writes in tests:** install `dama/doctrine-test-bundle` so each test runs in a transaction that is rolled back.
+  - Register `DAMA\DoctrineTestBundle\DAMADoctrineTestBundle::class => ['test' => true]` in `tests/Application/config/bundles.php`, and its PHPUnit extension (`<bootstrap class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension"/>`) in `phpunit.xml.dist`.
+  - The bundle needs `use_savepoints: true`, which the test application's `doctrine.yaml` already sets. DBAL 3, which Sylius 2.2 requires, makes savepoints opt-in, and without them the container doesn't compile.
 - **Doctrine in services:** require `setono/doctrine-orm-trait`. Inject `ManagerRegistry` and use `Setono\Doctrine\ORMTrait` instead of injecting `EntityManagerInterface`.
 - **Composite services** (several implementations behind one interface, collected by tag): require `setono/composite-compiler-pass` and register its compiler pass in the bundle's `build()`.
 
@@ -109,7 +116,10 @@ Install these the first time a task needs them, then update this file: move the 
   - Service ids are the fully qualified class name, and the interface is registered as an alias of it. The ids Sylius generates for resources (`acme_sylius_example.factory.<resource>`) are the exception.
   - Decorate with an explicit priority and `service('.inner')`.
   - Call `registerForAutoconfiguration()` in the extension for the plugin's own extension-point interfaces, so implementations in the application get tagged.
-- **Configuring other bundles:** do it in the extension's `prepend()`, with the configuration inlined as PHP arrays passed to `prependExtensionConfig()`. That covers grids, Twig hooks, workflows and Messenger buses. Don't ship YAML that applications have to import, and don't read YAML from disk in `prepend()`.
+- **Configuring other bundles:**
+  - Do it in the extension's `prepend()`, with the configuration inlined as PHP arrays passed to `prependExtensionConfig()`. That covers Twig hooks, workflows and Messenger buses; grids are PHP classes (see [Sylius](#sylius)). Don't ship YAML that applications have to import, and don't read YAML from disk in `prepend()`.
+  - Prepended configuration has the lowest precedence. It adds new hookables, emails and workflows, but any value Sylius' own config or the application sets wins without a warning, including a hookable's template and `enabled: false`. To change what Sylius sets, document the application config in the README, edit Sylius' service definition from a compiler pass (a hookable is `sylius_twig_hooks.hook.<hook>.hookable.<name>`), or use a runtime extension point such as a `sylius_mailer.email_modifier` service.
+  - Bundles resolve the `%parameters%` in their configuration as they load, in `bundles.php` order, and the plugin's own parameters only exist after its `load()`. In prepended configuration, refer to models by interface or class name. When a plugin parameter is unavoidable, the plugin must be registered before the receiving bundle, and the README must say so. That never works for `framework` and `doctrine`, because their bundles are registered first.
 - **Classes:**
   - Controllers are single-action invokable `*Action` classes.
   - Twig extensions only declare functions and filters. The work happens in a lazy runtime (`[FooRuntime::class, 'method']`, tagged `twig.runtime`).
@@ -127,7 +137,10 @@ Install these the first time a task needs them, then update this file: move the 
 
 - **Resources:** when the plugin adds resources, extend `AbstractResourceBundle` and override `getConfigFilesPath()` to point at `config/doctrine/model`. Register the resources from a `resources` node in the configuration tree, using `registerResources()` in the extension.
 - **Factories:** never `new` a resource. Use the resource factory, and decorate `acme_sylius_example.factory.<resource>` when creation needs defaults.
-- **Grids** are prepended as PHP arrays. The plugin bundle must therefore be registered before `SyliusGridBundle` in `bundles.php`, and the README must say so.
+- **Grids:**
+  - Each admin grid is an invokable PHP class with `#[AsGrid(resourceClass: '%acme_sylius_example.model.<resource>.class%', name: self::NAME)]`, registered with the `sylius.invokable_grid` tag. Its interface holds the `NAME` constant, as in Sylius core. Type-hint `Sylius\Component\Grid\Builder\GridBuilderInterface`.
+  - Require `sylius/grid-bundle: ^1.16`. It deprecates array grids, and it's the first version that resolves the `%parameter%` resource class. Grids need no particular bundle order.
+  - Applications customise a PHP grid with a grid mutator (`GridMutatorInterface` plus `#[AsGridMutator(grid: …)]`), because YAML doesn't merge into it. The README of a plugin that ships a grid says so.
 - **Templates:**
   - Admin and shop templates are injected through Twig hooks, prepended under `sylius_twig_hooks`.
   - Admin menu entries come from a listener on `sylius.menu.admin.main`.
@@ -184,16 +197,18 @@ Install these the first time a task needs them, then update this file: move the 
   - **Validation:** don't test it in form tests. It's applied by a listener that isn't active in the test case, and it depends on the validation configuration. Test the constraints directly with `ConstraintValidatorTestCase`.
   - **Form themes:** extend `Symfony\Bridge\Twig\Test\FormLayoutTestCase`.
 - **UI verification:**
-  - Verify every UI change (templates, Twig hooks, forms, grids, flash messages, styling) in the running test application with the Playwright MCP (`browser_navigate`, `browser_snapshot`, `browser_take_screenshot`). Check both what renders and how it behaves, e.g. submit the form.
-  - PHPUnit, PHPStan and ECS don't catch broken hooks, missing JavaScript or layout regressions.
-  - Use the MCP while developing. Durable coverage belongs in browser tests (see [Add when needed](#add-when-needed)).
+  - Cover every UI change (templates, Twig hooks, forms, grids, flash messages, styling) with a browser test in `tests/Browser/` (see Browser tests under [Add when needed](#add-when-needed)). Test both what renders and how it behaves, e.g. submit the form.
+  - Before reporting the work as done, take a screenshot of each page the change touches with `$page->screenshot()` and look at it.
+  - The unit and functional suites, PHPStan and ECS don't catch broken hooks, missing JavaScript or layout regressions. Twig hook wiring fails silently, so only the rendered page shows that it works.
 
 ## Quality Gates
 
 - **PHPStan** runs at level max with the Symfony, Doctrine, PHPUnit and Prophecy extensions, without a baseline. Fix errors rather than ignore them. When an ignore is unavoidable, scope it to the error identifier and the line, with a comment saying why.
 - **Rector** `--dry-run` must be clean; CI fails otherwise.
-- **Code coverage** must be at least 90%, for the project and for the lines each change adds or modifies (`codecov.yml`). Like the Infection thresholds, the targets only go up and have no tolerance below them. The unit and functional suites both count, because CI measures coverage against the test application's database and fixtures. Check coverage locally with `vendor/bin/phpunit --coverage-text` (needs pcov or Xdebug, and the test application's database for the functional suite).
-- **Infection** thresholds only go up. The skeleton starts at 100% MSI. When tests raise the score, raise `minMsi`/`minCoveredMsi` in the same change, and never lower them to get a change through.
+- **Code coverage** must be at least 90%, for the project and for the lines each change adds or modifies (`codecov.yml`). Like the Infection thresholds, the targets only go up and have no tolerance below them. The unit and functional suites both count, because CI measures coverage against the test application's database and fixtures. Browser tests don't count. Check coverage locally with `vendor/bin/phpunit --testsuite=unit,functional --coverage-text` (needs pcov or Xdebug, and the test application's database for the functional suite).
+- **Infection** runs only the `unit` suite (`testFrameworkOptions` in `infection.json5`), because the mutation-tests job has no database, assets or browsers. The thresholds only go up. The skeleton starts `minMsi` and `minCoveredMsi` at 100%. When tests raise the score, raise them in the same change, and never lower them to get a change through.
+  - Infection runs without `--with-uncovered`, so it mutates only code the unit suite covers. Code that only functional tests reach (a repository, a Doctrine listener) gets no mutants, so neither score drops.
+  - That code escapes mutation testing, so put logic worth mutating in services the unit suite covers.
 - **composer-dependency-analyser** runs with `require-dev` removed. Every package used in `src/` or `config/` must be in `require`, and every ignore needs a comment explaining why.
 - **Dev-only version pins:**
   - They go in `require-dev`, never in `conflict`, so they don't affect projects installing the plugin.
@@ -216,7 +231,7 @@ Whenever you add, rename or remove a key, do it in every locale file in the same
 
 ## CI
 
-CI uses the `setono/sylius-plugin/*@v2` composite actions. Most jobs run a matrix of PHP 8.2/8.3/8.4 × Symfony ~6.4/~7.4 × lowest/highest dependencies. The jobs are:
+CI uses the `setono/sylius-plugin/*@v2` composite actions. The `build` workflow runs on pull requests and on pushes to version branches only (`[0-9]+.x` and `[0-9]+.[0-9]+.x`), because an unfiltered push trigger runs every job twice on a pull request. Most jobs run a matrix of PHP 8.2/8.3/8.4/8.5 × Symfony ~6.4/~7.4 × lowest/highest dependencies. The jobs that build the test application's assets pass `node-version: "24"`, because the actions default to Node 20, which `@sylius-ui/admin` 2.3 rejects. The jobs are:
 
 - **Backwards compatibility:** Roave BC check, pull requests only.
 - **Coding standards:** composer validate/normalize, ECS, Rector, `lint:yaml`, `lint:twig`, and `symfony lsp:check` (because `.symfony-lsp.json` exists).
@@ -224,5 +239,5 @@ CI uses the `setono/sylius-plugin/*@v2` composite actions. Most jobs run a matri
 - **Static code analysis:** PHPStan.
 - **Unit tests:** the `unit` suite.
 - **Functional tests:** the same matrix, so the test application also boots on the lowest dependencies. Builds the assets, creates the MySQL schema, runs `doctrine:schema:validate`, loads the fixtures and runs the `functional` suite.
-- **Mutation tests:** Infection.
-- **Code coverage:** sets up the test application like the functional tests do (MySQL, assets, schema and fixtures), runs all PHPUnit suites with pcov and uploads the coverage to Codecov. Codecov's project and patch statuses fail below 90%.
+- **Mutation tests:** Infection on the `unit` suite, without a database. The action runs the latest Infection release that setup-php installs, not `vendor/bin/infection`.
+- **Code coverage:** sets up the test application like the functional tests do (MySQL, assets, schema and fixtures), runs PHPUnit with pcov and uploads the coverage to Codecov. It runs every suite unless the job passes a `testsuite`, which takes a comma-separated list (`unit,functional`). Codecov's project and patch statuses fail below 90%.

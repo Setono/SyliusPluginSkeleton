@@ -10,6 +10,11 @@
             "badge": "2.2.x"
         }
     },
+    // The mutation-tests job has no database, assets or browsers, so the initial run is limited to the unit suite.
+    // Infection applies --testsuite to the initial run only. Infection 0.34 deprecated this key in favour of
+    // testFrameworkExtraArgs, but vendor/bin/infection is 0.31 (from setono/sylius-plugin), which rejects the new key
+    "testFrameworkOptions": "--testsuite=unit",
+    // Without --with-uncovered, code that only the functional suite reaches gets no mutants, so neither score drops
     "minMsi": 100.00,
     "minCoveredMsi": 100.00
 }

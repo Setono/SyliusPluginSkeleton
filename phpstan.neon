@@ -11,9 +11,8 @@ parameters:
     bootstrapFiles:
         - tests/Application/config/bootstrap.php
 
-    # Symfony Configuration
-    symfony:
-        consoleApplicationLoader: tests/PHPStan/console_application.php
+    # No symfony.consoleApplicationLoader or doctrine.objectManagerLoader: both would boot the test
+    # application, which the static-code-analysis CI job can't do because it removes sylius/sylius first
 
     # Doctrine Configuration
     doctrine:

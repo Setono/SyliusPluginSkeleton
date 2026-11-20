@@ -13,10 +13,10 @@ Use this as a punch list. Skip what doesn't apply, but read every section before
 * `phpunit.xml.dist`, `phpstan.neon`, `ecs.php`, `rector.php`, `composer-dependency-analyser.php`, `infection.json5`
 * `.github/workflows/build.yaml`
 * Bundle `getPath()` override
-* The `setono/sylius-plugin: ^2.0` dev-dep and the `composer.json` `config` block
-* `tests/PHPStan/console_application.php`
+* The `composer.json` `require-dev` block (including the `setono/sylius-plugin: ^2.0` dev-dep), `scripts` block and `config` block
+* `CLAUDE.md`, which plugins generated from the skeleton inherit
 
-**Where this playbook and the skeleton diverge, the playbook calls it out explicitly.** The skeleton is the snapshot; the playbook reflects current Setono convention — when they conflict, follow the playbook.
+**Where this playbook and the skeleton diverge, the playbook calls it out explicitly**, and that guidance applies. Everywhere else, the skeleton and its `CLAUDE.md` are the source of truth, because CI runs against them: if a snippet here disagrees with the skeleton without saying so, follow the skeleton and report the mismatch in `Setono/SyliusPluginSkeleton`.
 
 ---
 
@@ -24,16 +24,18 @@ Use this as a punch list. Skip what doesn't apply, but read every section before
 
 Bump `composer.json` to the new floor. The Sylius 2.x ecosystem requires modern PHP and Symfony.
 
+The `require` block below is an example: list the packages your plugin's own code uses (`composer-dependency-analyser` checks that, see §10), with the skeleton's floors. The `require-dev` block is the skeleton's. Copy it from the skeleton's `composer.json` (it may have moved on since this was written), then add what your plugin's tests need on top.
+
 ```json
 "require": {
     "php": ">=8.2",
-    "sylius/channel": "^2.0",
-    "sylius/channel-bundle": "^2.0",
-    "sylius/core-bundle": "^2.0",
-    "sylius/product": "^2.0",
+    "sylius/channel": "^2.2",
+    "sylius/channel-bundle": "^2.2",
+    "sylius/core-bundle": "^2.2",
+    "sylius/product": "^2.2",
     "sylius/resource-bundle": "^1.12",
-    "sylius/taxonomy": "^2.0",
-    "sylius/ui-bundle": "^2.0",
+    "sylius/taxonomy": "^2.2",
+    "sylius/ui-bundle": "^2.2",
     "symfony/config":             "^6.4 || ^7.4",
     "symfony/console":            "^6.4 || ^7.4",
     "symfony/dependency-injection":"^6.4 || ^7.4",
@@ -46,12 +48,19 @@ Bump `composer.json` to the new floor. The Sylius 2.x ecosystem requires modern 
     "twig/twig": "^3.0"
 },
 "require-dev": {
-    "api-platform/core": "^4.0.3",
-    "lexik/jwt-authentication-bundle": "^3.1",
+    "api-platform/doctrine-orm": "^4.3",
+    "api-platform/symfony": "^4.3.3",
+    "gedmo/doctrine-extensions": "^3.22.2",
+    "knplabs/knp-menu-bundle": "^3.4.1",
+    "payum/core": "^1.7.5",
     "setono/sylius-plugin": "^2.0",
-    "sylius/sylius": "~2.2.5",
+    "sylius/grid-bundle": "^1.15",
+    "sylius/sylius": "~2.2.10",
+    "symfony/debug-bundle": "^6.4 || ^7.4",
     "symfony/dotenv": "^6.4 || ^7.4",
     "symfony/intl": "^6.4 || ^7.4",
+    "symfony/property-info": "^6.4 || ^7.4",
+    "symfony/serializer": "^6.4 || ^7.4",
     "symfony/var-exporter": "^6.4 || ^7.4",
     "symfony/web-profiler-bundle": "^6.4 || ^7.4",
     "symfony/webpack-encore-bundle": "^2.2"
@@ -61,9 +70,17 @@ Bump `composer.json` to the new floor. The Sylius 2.x ecosystem requires modern 
 Notes:
 
 * Drop PHP 7.x and 8.0/8.1 support entirely. PHP `>= 8.2` is the floor.
-* Drop Symfony `< 6.4`. Target `6.4 LTS` and `7.4+`.
-* Pin `sylius/sylius` to a concrete `~2.x.y` patch range in `require-dev` to keep the test app reproducible.
-* Cap `symfony/var-exporter` at `^6.4 || ^7.4` in `require-dev`. On PHP 8.4+ Composer otherwise resolves var-exporter 8, which has no LazyGhost, and every Doctrine command in the test app fails with "Symfony LazyGhost is not available". CI doesn't catch it, because it holds every Symfony package to one minor through `SYMFONY_REQUIRE`.
+* **Sylius 2.3 requires PHP `^8.3`** (Sylius 2.2 requires `^8.2`). A plugin that keeps the PHP 8.2 floor must keep allowing Sylius 2.2, and its PHP 8.2 CI lanes can only ever resolve Sylius 2.2.x. Raise the PHP floor to 8.3 in the same change that raises the Sylius floor to 2.3.
+* Drop Symfony `< 6.4`. Target the `6.4` and `7.4` LTS releases (`^6.4 || ^7.4` excludes 7.0–7.3).
+* Floor the Sylius packages at the minor the branch targets (`^2.2` on `2.2.x`, like the skeleton's `sylius/core-bundle`). The test app only runs that minor, but the static-code-analysis and dependency-analysis jobs install without `sylius/sylius`, so on lowest dependencies they resolve exactly that floor.
+* Pin `sylius/sylius` to the skeleton's `~2.x.y` patch range in `require-dev` to keep the test app reproducible. On `2.2.x` that's `~2.2.10`, the first release that conflicts with `doctrine/orm >= 3.7`, which rejects Sylius' `ShipmentUnit#shipment` mapping and fails `doctrine:schema:validate`.
+* Don't require `api-platform/core` or `lexik/jwt-authentication-bundle`. Sylius 2.2 uses API Platform's split packages (`api-platform/symfony`, `api-platform/doctrine-orm`, …), and `sylius/sylius` already requires `lexik/jwt-authentication-bundle: ^3.1`.
+* Several `require-dev` entries are floors that keep the test app booting, mostly on lowest dependencies. Keep them until the skeleton drops them:
+  * `api-platform/doctrine-orm: ^4.3` — `api-platform/symfony` 4.3 wires a class that `api-platform/doctrine-orm` only ships from 4.3, and nothing enforces the pairing.
+  * `gedmo/doctrine-extensions: ^3.22.2` — older versions declare a template bound that `symfony/type-info` >= 7.4.6 rejects, which breaks loading the API routes.
+  * `knplabs/knp-menu-bundle: ^3.4.1` — 3.4.0 doesn't register the `@KnpMenu` Twig namespace, so every admin page fails.
+  * `payum/core: ^1.7.5` — older versions aren't compatible with `psr/log` 3.
+  * `symfony/var-exporter: ^6.4 || ^7.4` — on PHP 8.4+ Composer otherwise resolves var-exporter 8, which has no LazyGhost, and every Doctrine command in the test app fails with "Symfony LazyGhost is not available". CI doesn't catch it, because it holds every Symfony package to one minor through `SYMFONY_REQUIRE`.
 * Pull dev tooling from `setono/sylius-plugin: ^2.0` (PHPStan, PHPUnit, Rector, ECS, Infection presets, GitHub composite actions, `shipmonk/composer-dependency-analyser`). This is the **single replacement** for the old `setono/code-quality-pack`.
 * Allow modern `doctrine/persistence` (`^4.0`) and other libs that bumped to support Symfony 7.
 
@@ -72,8 +89,8 @@ Document the new floor in `UPGRADE.md`:
 ```
 ### Requirements
 - PHP `>= 8.2`
-- Symfony `6.4` or `7.x`
-- Sylius `2.x`
+- Symfony `6.4` or `7.4`
+- Sylius `2.2` or newer
 
 The plugin no longer supports Sylius 1.x or PHP `< 8.2`.
 ```
@@ -231,27 +248,15 @@ CLAUDE.md guidance to add:
 
 ---
 
-## 5. Bundle prepending: ship config from `prepend()`, not YAML
+## 5. Configuring other bundles: `prepend()` instead of YAML, PHP classes for grids
 
-In Sylius 1.x plugins, you'd ship `config/app/config.yaml` and ask consumers to `imports:` it. In 2.x, prepend the config from your bundle extension and remove the YAML file entirely:
+In Sylius 1.x plugins, you'd ship `config/app/config.yaml` and ask consumers to `imports:` it. In 2.x, prepend the config from your bundle extension and remove the YAML file entirely. Admin grids are the exception: ship them as PHP grid classes (see [Admin grids](#admin-grids-php-grid-classes-not-prepended-arrays) below).
 
 ```php
 final class YourExtension extends AbstractResourceExtension implements PrependExtensionInterface
 {
     public function prepend(ContainerBuilder $container): void
     {
-        $container->prependExtensionConfig('sylius_grid', [
-            'grids' => [
-                'your_plugin_admin_thing' => [
-                    'driver' => [
-                        'name' => 'doctrine/orm',
-                        'options' => ['class' => '%your_plugin.model.thing.class%'],
-                    ],
-                    // …fields, filters, actions
-                ],
-            ],
-        ]);
-
         $container->prependExtensionConfig('sylius_twig_hooks', [/* … */]);
         $container->prependExtensionConfig('doctrine',           [/* … */]);
     }
@@ -260,17 +265,100 @@ final class YourExtension extends AbstractResourceExtension implements PrependEx
 
 Inline the array literal directly in `prepend()` — don't keep YAML on disk and parse it. The integration point becomes greppable and there's no I/O at compile time.
 
-Tell consumers to drop the import in `UPGRADE.md`:
+### Prepended config adds; it can't override what Sylius sets
 
-| `@YourPlugin/config/app/config.yaml` | Removed — the plugin's grid and twig-hook configuration is now registered automatically via `YourExtension::prepend()`. Drop the matching `imports:` entry from your `config/packages/your_plugin.yaml`. |
+`prependExtensionConfig()` puts the plugin's array at the front of the receiving bundle's config list (`array_unshift` in `ContainerBuilder`), so it has the lowest precedence. Everything the application loads is merged after it, including the Sylius config files that `config/packages/_sylius.yaml` imports. New keys work: a new hookable, email or workflow. A value Sylius already sets beats the plugin's, and nothing reports it:
+
+* Changing the template or priority of a hookable Sylius defines, or the template of a Sylius email (`sylius_mailer.emails.order_confirmation.template`), has no effect.
+* Disabling a Sylius hookable with `enabled: false` has no effect either. The twig-hooks configuration derives each hookable's `type` per config fragment, and Sylius' later fragment, which sets `template`, turns it back into a template hookable. Verified on Sylius 2.2.13: prepending `enabled: false` for `terms_and_conditions` under `sylius_shop.base.footer.content.menu.informational_links` leaves the placeholder footer link enabled.
+
+To change what Sylius configures, use one of these instead:
+
+* **Application config.** Document the YAML in the README. The application's own files under `config/packages/` load after `_sylius.yaml`, so they win. This suits changes that are the merchant's choice, such as hiding Sylius' placeholder footer links.
+* **A compiler pass** in the plugin bundle's `build()` that edits the definition Sylius registered. A hookable is the service `sylius_twig_hooks.hook.<hook name>.hookable.<hookable name>`. To disable it, set its class to `Sylius\TwigHooks\Hookable\DisabledHookable` and its arguments to `[<hook name>, <hookable name>]`. A compiler pass also beats the application's config, so put it behind an option in the plugin's configuration when applications may want the original back.
+* **A runtime extension point.** For emails, a service tagged `sylius_mailer.email_modifier` that implements `Sylius\Component\Mailer\Modifier\EmailModifierInterface` can change the template for one email code. Decorating `sylius.email_sender` also works.
+
+### Prepended config and the plugin's own parameters
+
+Symfony resolves the `%parameters%` in each bundle's configuration when that bundle's extension loads, in `bundles.php` order (`MergeExtensionConfigurationPass`). The plugin's own parameters, such as `%your_plugin.model.thing.class%` from `registerResources()`, only exist once the plugin's `load()` has run. Prepended config that references them breaks the container when the receiving bundle is registered before the plugin:
+
+```
+You have requested a non-existent parameter "your_plugin.model.thing.class" while loading extension "sylius_grid".
+```
+
+* Use the interface or class name instead, as Sylius' own workflows do (`supports: Sylius\Component\Core\Model\OrderInterface`). `FrameworkBundle` and `DoctrineBundle` sit at the top of every application's `bundles.php`, so `framework` (workflows, Messenger) and `doctrine` config can't use plugin parameters at all.
+* For grids, ship a PHP grid class (next section). The grid bundle resolves its `%parameter%` resource class in a compiler pass, after every extension has loaded, so bundle order doesn't matter.
+* When prepended config has to reference a plugin parameter, the plugin must be registered before the receiving bundle. Say so in the README's installation steps, and register the plugin in that position in `tests/Application/config/bundles.php`.
+
+### Admin grids: PHP grid classes, not prepended arrays
+
+From `sylius/grid-bundle` 1.16, grids defined as arrays under `sylius_grid.grids` (YAML, or prepended from `prepend()`) are deprecated: `ArrayGridProvider::get()` triggers a deprecation each time such a grid is used. Sylius 2.3 requires grid-bundle `^1.16`, and its `UPGRADE-2.3.md` calls PHP grids "the direction of Sylius 3.0". Ship each admin grid as an invokable class with `#[AsGrid]`:
+
+```php
+use Sylius\Bundle\GridBundle\Builder\Action\CreateAction;
+use Sylius\Bundle\GridBundle\Builder\Action\DeleteAction;
+use Sylius\Bundle\GridBundle\Builder\Action\UpdateAction;
+use Sylius\Bundle\GridBundle\Builder\Field\StringField;
+use Sylius\Bundle\GridBundle\Builder\Filter\StringFilter;
+use Sylius\Component\Grid\Attribute\AsGrid;
+use Sylius\Component\Grid\Builder\GridBuilderInterface;
+
+interface ThingGridInterface
+{
+    public const NAME = 'your_plugin_admin_thing';
+
+    public function __invoke(GridBuilderInterface $gridBuilder): void;
+}
+
+#[AsGrid(resourceClass: '%your_plugin.model.thing.class%', name: self::NAME)]
+final class ThingGrid implements ThingGridInterface
+{
+    public function __invoke(GridBuilderInterface $gridBuilder): void
+    {
+        $gridBuilder
+            ->addField(StringField::create('code')->setLabel('sylius.ui.code')->setSortable(true))
+            ->addFilter(StringFilter::create('code')->setLabel('sylius.ui.code'))
+            ->withMainActions(CreateAction::create())
+            ->withItemActions(UpdateAction::create(), DeleteAction::create())
+        ;
+    }
+}
+```
+
+Register it explicitly, the way Sylius core registers its own grids:
+
+```php
+$services->set(ThingGrid::class)->tag('sylius.invokable_grid');
+$services->alias(ThingGridInterface::class, ThingGrid::class);
+```
+
+* **Require `sylius/grid-bundle: ^1.16`** in `require`. It installs on Sylius 2.0–2.2, which require `^1.13` (the skeleton resolves 1.16.1 with Sylius 2.2.13). 1.16 is the first version that resolves a `%parameter%` resource class: its `InvokableGridPass` copies the attribute's `resourceClass` into a service definition, and the container resolves the parameter at compile time. On 1.14 and 1.15, `AbstractGrid` reads `#[AsGrid]` by reflection at runtime, so the placeholder stays a literal string. Use the parameter rather than `Thing::class`, so applications can override the model class.
+* **Type-hint `Sylius\Component\Grid\Builder\GridBuilderInterface`.** grid-bundle 1.16 deprecates `Sylius\Bundle\GridBundle\Builder\GridBuilderInterface`, although Sylius 2.3's own grids still use it. The field, filter and action builders (`StringField`, `StringFilter`, `CreateAction`, …) stay in `Sylius\Bundle\GridBundle\Builder\…`.
+* **Bundle order doesn't matter.** Verified on Sylius 2.2.13 with grid-bundle 1.16.1 and the plugin registered last: the grid resolves its resource class and triggers no deprecation.
+* **Applications customise the grid with a grid mutator.** A mutator is a service that implements `Sylius\Component\Grid\Mutator\GridMutatorInterface`. In the application it's autoconfigured from `#[AsGridMutator(grid: ThingGridInterface::NAME)]`; without autoconfiguration, tag it `sylius.grid_mutator` with a `grid` attribute. Its `__invoke(GridBuilderInterface $gridBuilder)` adds, changes or removes fields, filters and actions. Mutators need grid-bundle 1.16 and apply whichever provider serves the grid. YAML doesn't merge into a PHP grid: on Sylius 2.2 the PHP grid wins and a YAML grid with the same name is ignored without a warning (`ServiceGridProvider` runs before `ArrayGridProvider`). On Sylius 2.3, `OverrideGridProvider` decorates the chain provider and, with the default `sylius_core.grid.use_legacy_config: true`, serves the YAML grid instead, which replaces the PHP grid wholesale.
+
+### Tell consumers in `UPGRADE.md`
+
+| `@YourPlugin/config/app/config.yaml` | Removed — the plugin's twig-hook configuration is now registered automatically via `YourExtension::prepend()`, and its grids are PHP classes. Drop the matching `imports:` entry from your `config/packages/your_plugin.yaml`. |
+| YAML overrides of the `your_plugin_admin_thing` grid | The grid is now the PHP class `YourPlugin\Grid\ThingGrid`, and YAML no longer merges into it. Move your changes to a grid mutator: a service implementing `Sylius\Component\Grid\Mutator\GridMutatorInterface` with `#[AsGridMutator(grid: 'your_plugin_admin_thing')]`. |
 
 CLAUDE.md guidance:
 
 ```
-- When the plugin needs to configure another bundle (`sylius_grid`,
-  `sylius_twig_hooks`, doctrine, etc.), do it from `YourExtension::prepend()`
-  via `$container->prependExtensionConfig(...)` with the config inlined as a
+- When the plugin needs to configure another bundle (`sylius_twig_hooks`,
+  doctrine, etc.), do it from `YourExtension::prepend()` via
+  `$container->prependExtensionConfig(...)` with the config inlined as a
   PHP array. Don't ship YAML files that consumers have to import.
+- Prepended config has the lowest precedence: it adds keys but can't change
+  or disable what Sylius' own config sets. For that, document app config in
+  the README, or use a compiler pass or a runtime extension point.
+- Keep the plugin's own %parameters% out of prepended config. If you can't,
+  the plugin must be registered before the receiving bundle in bundles.php,
+  and the README must say so.
+- Admin grids are `#[AsGrid]` PHP classes tagged `sylius.invokable_grid`,
+  with `resourceClass: '%your_plugin.model.<resource>.class%'`. Require
+  `sylius/grid-bundle: ^1.16`. Applications customise them with grid
+  mutators.
 ```
 
 ---
@@ -592,18 +680,28 @@ Key files to align with the skeleton:
 * `tests/Application/config/packages/*.yaml` — package configuration.
 * `tests/Application/public/index.php` — see §11b on the `HEADER_X_FORWARDED_ALL` removal.
 
+**Bundle order.** The skeleton registers the plugin last in `bundles.php`. That works as long as the plugin's prepended config doesn't reference the plugin's own `%parameters%` (§5). A plugin that still prepends a `sylius_grid` array grid with `%your_plugin.model.thing.class%` must be registered before `SyliusGridBundle`, or the container fails with "You have requested a non-existent parameter". Converting the grid to a PHP grid class (§5) removes that requirement. If some other prepended config has to reference a plugin parameter, register the plugin before the bundle that receives it, here and in the README's installation steps.
+
 Other key points:
 
 * Functional tests **require MySQL** — make this explicit in CLAUDE.md and CI.
 
-* API tests need `api-platform/core: ^4.0.3` and `lexik/jwt-authentication-bundle: ^3.1` in `require-dev`.
+* API tests need nothing beyond the skeleton's `require-dev` (§1): it has `api-platform/symfony` and `api-platform/doctrine-orm`, and `sylius/sylius` brings `lexik/jwt-authentication-bundle`.
 
-* `dama/doctrine-test-bundle: ^8.6` is **optional** — useful for transactional DB isolation in functional tests if you have many of them; the skeleton doesn't require it. Add it when test-isolation pain is real, not preemptively. If you add it, register the PHPUnit extension in `phpunit.xml.dist`:
+* `dama/doctrine-test-bundle: ^8.6` is **optional** — it runs each test in a transaction that is rolled back; the skeleton doesn't require it. Add it once tests write to the database (browser tests usually do, §16), not preemptively. If you add it, register `DAMA\DoctrineTestBundle\DAMADoctrineTestBundle::class => ['test' => true]` in `tests/Application/config/bundles.php` and the PHPUnit extension in `phpunit.xml.dist`:
 
     ```xml
     <extensions>
         <bootstrap class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension"/>
     </extensions>
+    ```
+
+    DAMA also needs savepoints for the transactions nested in each test's transaction. Sylius 2.2 requires DBAL 3, where they are opt-in, and without them the test app's container doesn't compile ("This bundle relies on savepoints for nested database transactions"). Keep `use_savepoints: true` under `doctrine.dbal` in `tests/Application/config/packages/doctrine.yaml`, which the skeleton sets already:
+
+    ```yaml
+    doctrine:
+        dbal:
+            use_savepoints: true
     ```
 
 * The skeleton splits `phpunit.xml.dist` into `unit` and `functional` test suites so unit tests stay fast and CLI-friendly without booting MySQL. Mirror that split: keep kernel-free logic under `tests/Unit/` and anything that boots the app (and therefore needs MySQL) under `tests/Functional/`:
@@ -620,6 +718,10 @@ Other key points:
         </testsuites>
     </phpunit>
     ```
+
+* A plugin with UI surfaces adds a third suite, `browser` (`tests/Browser/`, playwright-symfony), with its first UI change (§16). The skeleton ships without it; its `CLAUDE.md` ("Add when needed" → "Browser tests") governs the setup, including the CI job.
+
+* The CI jobs pick their suites. The mutation-tests job has no MySQL, assets or browsers, so the skeleton's `infection.json5` limits Infection's initial run to `unit` (`"testFrameworkOptions": "--testsuite=unit"`). Infection runs without `--with-uncovered`, so code that only functional tests reach (repositories, Doctrine listeners) gets no mutants, and `minMsi` and `minCoveredMsi` both stay at 100. Code coverage counts `unit` and `functional`; once a `browser` suite exists, pass `testsuite: "unit,functional"` to the `code-coverage` job, which installs no browsers.
 
 Booting the test app locally (document this verbatim in CLAUDE.md):
 
@@ -661,7 +763,6 @@ And to **add**:
 * `composer-dependency-analyser.php` — replaces require-checker + composer-unused
 * `phpstan.neon` — replaces psalm
 * `infection.json5` — replaces `infection.json.dist`
-* `tests/PHPStan/console_application.php` — referenced by `phpstan.neon`'s `symfony.consoleApplicationLoader`
 * `.github/workflows/build.yaml` — single workflow using the composite actions
 
 `phpstan.neon`:
@@ -672,31 +773,42 @@ parameters:
     paths: [src, tests]
     excludePaths: [tests/Application/*]
     bootstrapFiles: [tests/Application/config/bootstrap.php]
-    symfony:
-        consoleApplicationLoader: tests/PHPStan/console_application.php
     doctrine:
         repositoryClass: Doctrine\ORM\EntityRepository
     reportUnmatchedIgnoredErrors: false
     treatPhpDocTypesAsCertain: false
-    ignoreErrors:
-        - { identifier: missingType.generics }
-        - { identifier: missingType.iterableValue }
 ```
+
+* **No `symfony.consoleApplicationLoader` and no `doctrine.objectManagerLoader`.** Both boot the test application, which the static-code-analysis job can't do: it removes `sylius/sylius` before installing, so the test app's bundles are missing. phpstan-symfony only calls the console loader when it analyses a `Command` subclass, so nothing fails until the plugin adds its first console command, and then only in CI, with `Internal error: Class "Symfony\Bundle\MonologBundle\MonologBundle" not found`. Without the loader, `InputInterface::getOption()` and `getArgument()` return `mixed`, and level max makes the command narrow them (e.g. with `Assert::string()`). If the plugin has a `tests/PHPStan/console_application.php` from an earlier version of this playbook, delete it together with the loader.
+* **No `ignoreErrors` and no baseline.** Fix `missingType.generics` and `missingType.iterableValue` errors by declaring the generic and iterable types. When an ignore is unavoidable, scope it to the error identifier and the line, with a comment saying why: `// @phpstan-ignore missingType.generics (reason)`.
 
 `ecs.php`:
 
 ```php
 return static function (ECSConfig $config): void {
     $config->import('vendor/sylius-labs/coding-standard/ecs.php');
-    $config->paths(['src', 'tests', 'composer-dependency-analyser.php', 'ecs.php', 'rector.php']);
-    $config->skip(['tests/Application/**']);
+    $config->paths([
+        'src',
+        'tests',
+        'composer-dependency-analyser.php',
+        'rector.php',
+    ]);
+    $config->skip([
+        // Generated (and gitignored): Symfony 7.4 writes it whenever it builds the debug container
+        'tests/Application/config/reference.php',
+        'tests/Application/node_modules/**',
+        'tests/Application/var/**',
+    ]);
 };
 ```
+
+Unlike PHPStan and Rector, ECS checks the test application's own PHP files (`Kernel.php`, `config/bootstrap.php`, …). Skip only what's generated or installed there, not all of `tests/Application/`.
 
 `rector.php` (target the same PHP floor you committed to):
 
 ```php
 return static function (RectorConfig $rectorConfig): void {
+    $rectorConfig->cacheDirectory('./.build/rector');
     $rectorConfig->paths([__DIR__ . '/src', __DIR__ . '/tests']);
     $rectorConfig->skip([__DIR__ . '/tests/Application']);
     $rectorConfig->sets([LevelSetList::UP_TO_PHP_82]);
@@ -712,6 +824,12 @@ return (new Configuration())->addPathToExclude(__DIR__ . '/tests');
 CI (`.github/workflows/build.yaml`) — use the composite actions, matrix over PHP and Symfony:
 
 ```yaml
+on:
+    push:
+        branches: ["[0-9]+.x", "[0-9]+.[0-9]+.x"]
+    pull_request: ~
+    workflow_dispatch: ~
+
 jobs:
     backwards-compatibility:
         runs-on: ubuntu-latest
@@ -725,7 +843,7 @@ jobs:
     dependency-analysis:
         strategy:
             matrix:
-                php-version: ["8.2", "8.3", "8.4"]
+                php-version: ["8.2", "8.3", "8.4", "8.5"]
                 dependencies: ["lowest", "highest"]
                 symfony: ["~6.4.0", "~7.4.0"]
         steps:
@@ -737,34 +855,27 @@ jobs:
 
     static-code-analysis: { /* same matrix */ }
     unit-tests:           { /* same matrix */ }
-    # …functional-tests, mutation-tests, code-coverage
+    functional-tests:     { /* same matrix, plus node-version: "24" */ }
+    # …mutation-tests, code-coverage (also node-version: "24")
 ```
+
+* **Triggers:** limit `push` to version branches. `pull_request` already runs on every push to a pull request branch, so an unfiltered `push: ~` runs every job twice. Don't shorten the patterns to `"*.x"`: `*` also matches topic branches such as `fix-foo-2.2.x`. The patterns start with `[`, so YAML needs them quoted.
+* **Node:** pass `node-version: "24"` to `functional-tests` and `code-coverage`, the two actions that build the test application's assets. Their default is Node 20, which is end of life, and `@sylius-ui/admin` 2.3 refuses to install on it (it requires `^22.13.0 || >=24.0`).
 
 `composer.json` scripts:
 
 ```json
 "scripts": {
-    "analyse":           "phpstan analyse",
-    "check-style":       "ecs check",
-    "fix-style":         "ecs check --fix",
-    "phpunit":           "phpunit --testsuite unit,functional",
-    "phpunit:functional":"phpunit --testsuite functional",
-    "phpunit:unit":      "phpunit --testsuite unit"
+    "analyse": "phpstan analyse",
+    "check-style": "ecs check",
+    "fix-style": "ecs check --fix",
+    "phpunit": "phpunit"
 }
 ```
 
-Code-quality CLAUDE.md section:
+`composer phpunit` runs every suite in `phpunit.xml.dist`. Run a single suite with `vendor/bin/phpunit --testsuite=unit` (or `functional`), as the skeleton's `CLAUDE.md` documents, rather than adding a script per suite.
 
-```
-## Code Quality
-- PHP >=8.2, targeting Symfony 6.4/7.4
-- Dev tooling (PHPStan, PHPUnit, Rector, ECS, Infection) comes from `setono/sylius-plugin`
-- PHPStan at `level: max` with Sylius/Symfony/Doctrine/PHPUnit/strict-rules extensions
-- ECS imports `sylius-labs/coding-standard`
-- All tools skip `tests/Application/`
-- `declare(strict_types=1);` required in all PHP files
-- CI uses the `setono/sylius-plugin/*@v2` composite GitHub Actions
-```
+Code-quality section of CLAUDE.md: take the **Quality Gates** section from the skeleton's `CLAUDE.md` rather than writing your own, so the plugin's rules match what its CI enforces. In particular, PHPStan runs without a baseline or global ignores, and not every tool skips `tests/Application/`: ECS checks the test app's PHP files.
 
 ---
 
@@ -793,13 +904,22 @@ Run `bin/console doctrine:schema:validate` after the conversion. Pay particular 
 
 ---
 
-## 11b. Deprecation sweeps: Symfony 7 and PHP 8.4
+## 11b. Deprecation sweeps: Symfony 7, PHP 8.4 and PHP 8.5
 
-The new CI matrix (PHP 8.2/8.3/8.4 × Symfony 6.4/7.4) catches things older toolchains hid. Sweep proactively:
+The new CI matrix (PHP 8.2/8.3/8.4/8.5 × Symfony 6.4/7.4) catches things older toolchains hid. Sweep proactively:
 
 * **`Request::HEADER_X_FORWARDED_ALL` removed in Symfony 6.0** — so it's absent on every supported version (`6.4` and `7.4`), and `HEADER_X_FORWARDED_ALL ^ HEADER_X_FORWARDED_HOST` fatals at runtime once `TRUSTED_PROXIES` is set. Replace it in `tests/Application/public/index.php` with the explicit bitmask `HEADER_X_FORWARDED_FOR | HEADER_X_FORWARDED_PORT | HEADER_X_FORWARDED_PROTO` (the skeleton already does this — mirror it).
 * **PHP 8.4 deprecates implicit nullable parameters.** `function foo(Foo $x = null)` now warns; rewrite to `function foo(?Foo $x = null)`. Rector can do this for you — run the dry-run before committing.
-* Run `composer phpstan` and `composer phpunit` against each matrix cell locally if you have the PHP versions installed, otherwise rely on CI.
+* **PHP 8.5 deprecates more legacy syntax and calls that no longer do anything.** The ones plugins are likely to hit:
+  * `setAccessible()` on `ReflectionProperty`, `ReflectionMethod` and the other Reflection classes, common in tests. It has had no effect since PHP 8.1, so delete the calls.
+  * The non-canonical casts `(boolean)`, `(integer)`, `(double)` and `(binary)`. Use `(bool)`, `(int)`, `(float)` and `(string)`.
+  * `null` as an array offset or as the key passed to `array_key_exists()`. Use `''`.
+  * The backtick operator. Call `shell_exec()`, or better, use `symfony/process`.
+  * `SplObjectStorage::attach()`, `detach()` and `contains()`. Use `offsetSet()`, `offsetUnset()` and `offsetExists()`.
+  * `curl_close()`, `finfo_close()`, `imagedestroy()` and `xml_parser_free()`. The handles are freed automatically, so delete the calls.
+  * The `PDO::MYSQL_ATTR_*` constants, replaced by `Pdo\Mysql::ATTR_*`. `Pdo\Mysql` only exists from PHP 8.4, so with an 8.2 floor pick the constant by `PHP_VERSION_ID`.
+  * `__sleep()` and `__wakeup()` are only soft-deprecated (no notice yet). Use `__serialize()` and `__unserialize()` in new code.
+* Run `composer analyse` and `composer phpunit` against each matrix cell locally if you have the PHP versions installed, otherwise rely on CI.
 
 ---
 
@@ -906,21 +1026,28 @@ Both stay in the unit suite — no kernel boot, no MySQL.
 
 ---
 
-## 16. UI verification with Playwright
+## 16. UI verification with browser tests
 
-For any UI change (admin form, grid, page), boot the test app and verify in a browser via the Playwright MCP. Don't rely on PHPStan/PHPUnit alone — Twig hook wiring fails silently and only shows in the rendered DOM.
+Cover every UI change (admin form, grid, page) with a browser test in `tests/Browser/`, and look at a screenshot of each page it changes before reporting the work as done. The unit and functional suites, PHPStan and ECS aren't enough — Twig hook wiring fails silently and only shows in the rendered page.
+
+Browser tests use [playwright-php/playwright-symfony](https://github.com/playwright-php/playwright-symfony) in a third PHPUnit suite, `browser` (§9). Add the suite with the plugin's first UI change. The skeleton's `CLAUDE.md` ("Add when needed" → "Browser tests") governs the setup: installing the bundle and Chromium, `/bundles` assets, and the CI job. Why browser tests rather than checking by hand or through the Playwright MCP:
+
+* **They stay.** CI runs them on every build, so the check keeps holding after the change. A manual or MCP check happens once and leaves nothing behind.
+* **They're always there.** playwright-symfony is a dev dependency of the plugin, so every contributor and agent has it. The MCP exists only where a developer installed it.
+* **They see the test's data.** playwright-symfony handles the browser's requests in the test's own kernel, inside the DAMA transaction (§9), so a test sets up exactly the case it checks.
+* **They give screenshots too.** `$page->screenshot()` shows what the page looks like. Pass it an absolute path, because the Playwright server resolves a relative one against its own working directory.
 
 CLAUDE.md guidance:
 
 ```
 - When you build or change a feature with a UI surface (admin form, grid, page),
-  verify it via the Playwright MCP — boot the test app (see "Booting the test app
-  locally"), navigate to the affected page, and confirm the rendered output
-  before reporting the task as complete. Don't rely on PHPUnit/PHPStan/ECS alone
-  for UI work.
+  cover it with a browser test in `tests/Browser/`, and look at a screenshot of
+  each page it changes (`$page->screenshot()`, absolute path) before reporting the
+  task as complete. Don't rely on the unit and functional suites, PHPStan or ECS
+  for UI work: Twig hook wiring fails silently and only the rendered page shows it.
 ```
 
-Companion tips that save real time when working with the test app server:
+When you also run the test app server by hand, these tips save real time:
 
 ```
 - Before running `symfony server:start`, run `symfony server:status` first — the
@@ -1021,19 +1148,19 @@ If you're driving this with an agent, here's an order that minimizes rebuild loo
 1. **Bump `composer.json`** (§1) — get the dependency graph resolving on the new floor before touching code.
 2. **Move files** (§2) — `Resources/` → repo root in one mechanical pass; update `getPath()` **and** `getConfigFilesPath()`.
 3. **Convert DI to PHP DSL** (§3) — file-by-file. Keep service ids identical for now.
-4. **Update `tests/Application/` in place** (§9) — diff against `Setono/SyliusPluginSkeleton`. Register `SyliusTwigHooksBundle` if relevant. Get `composer phpunit:functional` running with at least one trivial test.
+4. **Update `tests/Application/` in place** (§9) — diff against `Setono/SyliusPluginSkeleton`. Register `SyliusTwigHooksBundle` if relevant. Get `vendor/bin/phpunit --testsuite=functional` running with at least one trivial test.
 5. **Update tooling configs** (§10–11) — PHPStan, ECS, Rector, CI. Delete the old quality-pack files; add the new ones. Get them green.
 6. **Convert Doctrine PHPDoc mappings to attributes** (§11a) — run `doctrine:schema:validate` to confirm.
-7. **Sweep Symfony 7 / PHP 8.4 deprecations** (§11b).
+7. **Sweep Symfony 7 / PHP 8.4 / PHP 8.5 deprecations** (§11b).
 8. **Move bundle config to `prepend()`** (§5).
 9. **Rework routing** (§6).
-10. **Port templates to Twig hooks** (§7) — keep working `AbstractTypeExtension` form extensions and `sylius.menu.admin.main` listeners; only port template overrides and page menu builders. Verify each surface in Playwright.
+10. **Port templates to Twig hooks** (§7) — keep working `AbstractTypeExtension` form extensions and `sylius.menu.admin.main` listeners; only port template overrides and page menu builders. Cover each surface with a browser test (§16).
 11. **Migrate admin `CollectionType` fields to `LiveCollectionType`** (§7a) — needed for any plugin that ships an inline collection in the admin product/variant form.
 12. **Switch service ids to FQCN** (§4) — touch only services you're already modifying. Catch known Sylius core renames (`sylius.integer_distributor` → `sylius.distributor.integer`).
 13. **Migrate Doctrine call sites to `ManagerRegistry`** (§8).
 14. **Pin behavior changes intentionally** (§17), update `UPGRADE.md` (§18) and `README.md` continuously.
 15. **Translate into all target locales** (§13) — add or refresh `translations/<domain>.<locale>.yaml` for every locale in the target set, not just English.
-16. **Final pass**: `composer fix-style && composer analyse && composer phpunit` clean, Playwright green on every UI surface, CI green on the full matrix.
+16. **Final pass**: `composer fix-style && composer analyse && composer phpunit` clean (`phpunit` runs the `browser` suite too), a browser test for every UI surface (§16), CI green on the full matrix.
 
 ---
 
@@ -1048,5 +1175,5 @@ If you're driving this with an agent, here's an order that minimizes rebuild loo
 * **Don't rewrite working `AbstractTypeExtension` form extensions as Twig hook subscribers.** Sylius 2.x core still uses form extensions. Do give each field they add a hookable that renders it, though: admin and shop forms don't render leftover fields, so without one the field never reaches the page (§7).
 * Don't migrate an admin `CollectionType` to v2 without switching `getParent()` to `LiveCollectionType` — the Add/Delete buttons silently break (§7a).
 * Don't leave Doctrine PHPDoc mappings (`@ORM\OneToMany`) in entities or traits — ORM 3 ignores them silently and inverse-side associations stop wiring (§11a).
-* Don't claim a UI change works because PHPUnit passes. Twig hook misconfiguration only surfaces in a real browser (§16).
+* Don't claim a UI change works because the unit and functional suites pass. Twig hook misconfiguration only surfaces in a real browser, so cover it with a browser test (§16).
 * Don't ship the major release with unresolved PHPStan or ECS errors — the matrix CI will catch them on a PHP/Symfony combination you didn't test locally.

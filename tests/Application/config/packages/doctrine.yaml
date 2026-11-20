@@ -13,6 +13,11 @@ doctrine:
 
         url: '%env(resolve:DATABASE_URL)%'
 
+        # dama/doctrine-test-bundle needs savepoints for the transactions nested in each test's transaction, and its
+        # container won't compile without them. DBAL 4 always uses savepoints, but Sylius 2.2 is on DBAL 3, where they
+        # are opt-in. Remove this once Sylius requires DBAL 4, where DoctrineBundle deprecates the key
+        use_savepoints: true
+
 when@prod:
     doctrine:
         orm:
