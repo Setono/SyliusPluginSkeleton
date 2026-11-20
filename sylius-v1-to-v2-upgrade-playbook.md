@@ -56,6 +56,8 @@ The `require` block below is an example: list the packages your plugin's own cod
     "setono/sylius-plugin": "^2.0",
     "sylius/grid-bundle": "^1.15",
     "sylius/sylius": "~2.2.10",
+    "symfony/browser-kit": "^6.4 || ^7.4",
+    "symfony/css-selector": "^6.4 || ^7.4",
     "symfony/debug-bundle": "^6.4 || ^7.4",
     "symfony/dotenv": "^6.4 || ^7.4",
     "symfony/intl": "^6.4 || ^7.4",
@@ -621,7 +623,33 @@ The Live actions only dispatch if the surrounding form is a Live Component. Syli
         component: 'sylius_admin:product:form'
 ```
 
-Plugins hooking into the product form get add/remove for free. Plugins hooking into a **non-**Live-Component form must either expose their own component or fall back to a custom Stimulus controller. Don't reach for `LiveCollectionType` somewhere it can't work.
+Plugins hooking into the product form get add/remove for free. Plugins hooking into a **non-**Live-Component form must either expose their own component or fall back to a custom Stimulus controller, which the plugin ships as admin JavaScript (§7b). Don't reach for `LiveCollectionType` somewhere it can't work.
+
+---
+
+## 7b. Admin JavaScript: shipping Stimulus controllers
+
+Sylius 1 plugins usually shipped admin JavaScript as files under `src/Resources/public/` and loaded them with a `<script>` tag from a template event. Sylius 2 builds the admin with Webpack Encore and runs its JavaScript as Stimulus controllers. The application, not Sylius, starts the Stimulus app: Sylius-Standard's `app.admin` build has an `app-admin-entry` that starts it with the controllers in the application's `controllers.json` files. A plugin's JavaScript reaches the admin when the application imports the plugin's entrypoint into that entry. The plugin has no Encore build of its own, so it has no `<script>` tag to add.
+
+The rules for the plugin's side live in the skeleton's `CLAUDE.md` under "Admin JavaScript": where the files go, how the plugin registers its controllers (its own Stimulus application, or an npm package), what `controllers.json` is for, and why the entrypoint never calls `startStimulusApp()`. The upgrade steps:
+
+1. Copy `assets/admin/entrypoint.js` and `assets/admin/controllers.json` from the skeleton, the layout of [Sylius/PluginSkeleton](https://github.com/Sylius/PluginSkeleton). Move the admin JavaScript that 1.x loaded with `<script>` tags into the entrypoint, register its controllers as `CLAUDE.md` describes, and delete the old files and the template events that loaded them. The shop keeps plain JavaScript in `public/`, so there's no shop entrypoint.
+2. Mirror these test application files from the skeleton. They build and load the plugin's entry the way Sylius' [TestApplication](https://github.com/Sylius/TestApplication) does:
+   * `tests/Application/webpack.config.js` — builds Sylius' admin with `getBaseWebpackConfig()` and adds an `app.admin` build. Sylius' npm package marks `getWebpackConfig()` as meant for sylius/sylius' own tests. The `app.admin` build has two entries:
+     * `app-admin-entry` (`tests/Application/assets/admin/entrypoint.js`) starts the Stimulus app. It registers the controllers of the installed Sylius version's `controllers.json` merged with the plugin's. Reading Sylius' file instead of copying its list matters, because Sylius 2.3 adds a controller (`theme-switcher`) that 2.2 doesn't have.
+     * `plugin-admin-entry` is the plugin's `assets/admin/entrypoint.js`.
+   * `tests/Application/package.json` — adds `@sylius/admin-bundle`, which holds Sylius' `controllers.json` and controllers.
+   * `tests/Application/config/packages/webpack_encore.yaml` and `assets.yaml` — register the `app.admin` build.
+   * `tests/Application/config/packages/sylius_twig_hooks.yaml` and `tests/Application/templates/admin/{stylesheets,javascripts}.html.twig` — load both entries into the `sylius_admin.base#stylesheets` and `#javascripts` hooks.
+3. Cover what the controllers do with browser tests (§16). The functional suite only shows that the page references the entry, not that a controller connects.
+4. Tell applications to import the entrypoint in the README's installation steps, as the skeleton's README does:
+
+    ```js
+    // assets/admin/entrypoint.js in the application
+    import '@vendor/your-vendor/your-plugin/assets/admin/entrypoint';
+    ```
+
+5. Say so in `UPGRADE.md` too, because applications upgrading from 1.x have to add the import and rebuild their assets.
 
 ---
 
@@ -679,6 +707,7 @@ Key files to align with the skeleton:
 * `tests/Application/config/bundles.php` — every Sylius 2.x bundle plus your plugin. **Add `Sylius\TwigHooks\SyliusTwigHooksBundle`** if you use Twig hooks (the skeleton has it pre-registered).
 * `tests/Application/config/packages/*.yaml` — package configuration.
 * `tests/Application/public/index.php` — see §11b on the `HEADER_X_FORWARDED_ALL` removal.
+* `tests/Application/webpack.config.js` and the other asset files §7b lists — they build the plugin's admin JavaScript and load it into the admin.
 
 **Bundle order.** The skeleton registers the plugin last in `bundles.php`. That works as long as the plugin's prepended config doesn't reference the plugin's own `%parameters%` (§5). A plugin that still prepends a `sylius_grid` array grid with `%your_plugin.model.thing.class%` must be registered before `SyliusGridBundle`, or the container fails with "You have requested a non-existent parameter". Converting the grid to a PHP grid class (§5) removes that requirement. If some other prepended config has to reference a plugin parameter, register the plugin before the bundle that receives it, here and in the README's installation steps.
 
@@ -1154,7 +1183,7 @@ If you're driving this with an agent, here's an order that minimizes rebuild loo
 7. **Sweep Symfony 7 / PHP 8.4 / PHP 8.5 deprecations** (§11b).
 8. **Move bundle config to `prepend()`** (§5).
 9. **Rework routing** (§6).
-10. **Port templates to Twig hooks** (§7) — keep working `AbstractTypeExtension` form extensions and `sylius.menu.admin.main` listeners; only port template overrides and page menu builders. Cover each surface with a browser test (§16).
+10. **Port templates to Twig hooks** (§7) — keep working `AbstractTypeExtension` form extensions and `sylius.menu.admin.main` listeners; only port template overrides and page menu builders. Move the admin JavaScript that 1.x templates loaded with `<script>` tags into `assets/admin/` (§7b). Cover each surface with a browser test (§16).
 11. **Migrate admin `CollectionType` fields to `LiveCollectionType`** (§7a) — needed for any plugin that ships an inline collection in the admin product/variant form.
 12. **Switch service ids to FQCN** (§4) — touch only services you're already modifying. Catch known Sylius core renames (`sylius.integer_distributor` → `sylius.distributor.integer`).
 13. **Migrate Doctrine call sites to `ManagerRegistry`** (§8).

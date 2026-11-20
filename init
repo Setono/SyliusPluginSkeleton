@@ -117,6 +117,8 @@ use Symfony\Component\Process\Process;
         foreach ($finder as $file) {
             replaceInFile($file->getPathname(), [
                 'acme_sylius_example' => $yamlNamespace,
+                // The kebab-case form, e.g. in Stimulus controller identifiers
+                'acme-sylius-example' => str_replace('_', '-', $yamlNamespace),
                 'Acme\\SyliusExamplePlugin' => $phpNamespace,
                 'AcmeSyliusExamplePlugin' => $vendor.$pluginNameWithSuffix,
                 'AcmeSyliusExample' => $vendor.$pluginName,

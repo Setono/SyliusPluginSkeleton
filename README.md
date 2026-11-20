@@ -41,6 +41,59 @@ Enjoy!
 
 To be able to set up a plugin's database, remember to configure you database credentials in `tests/Application/.env` and `tests/Application/.env.test`.
 
+## Installation
+
+The plugin ships no Flex recipe, so an application installs it with these steps.
+
+1. Require the plugin:
+
+    ```shell
+    composer require setono/sylius-plugin-skeleton
+    ```
+
+2. Register the plugin in `config/bundles.php`:
+
+    ```php
+    Acme\SyliusExamplePlugin\AcmeSyliusExamplePlugin::class => ['all' => true],
+    ```
+
+3. Import the plugin's routes in `config/routes/acme_sylius_example.yaml`:
+
+    ```yaml
+    acme_sylius_example:
+        resource: "@AcmeSyliusExamplePlugin/config/routes.yaml"
+    ```
+
+    If your shop doesn't use localised URLs, import `@AcmeSyliusExamplePlugin/config/routes_no_locale.yaml` instead.
+
+4. Import the plugin's admin JavaScript into your admin entry, `assets/admin/entrypoint.js` in Sylius-Standard:
+
+    ```js
+    import '@vendor/setono/sylius-plugin-skeleton/assets/admin/entrypoint';
+    ```
+
+    `@vendor` is the alias for `vendor/` that Sylius-Standard's `webpack.config.js` defines. Without it, use the path relative to the entry, `../../vendor/setono/sylius-plugin-skeleton/assets/admin/entrypoint`.
+
+    Your admin must load `app-admin-entry`, which Sylius-Standard has done since 2.0.1. An application started from 2.0.0 builds the import but never loads it (its entry is `assets/admin/entry.js`), so add the hooks and the two one-line templates that 2.0.1 added:
+
+    ```yaml
+    # config/packages/_sylius.yaml
+    sylius_twig_hooks:
+        hooks:
+            'sylius_admin.base#stylesheets':
+                app_styles:
+                    template: 'admin/stylesheets.html.twig' # {{ encore_entry_link_tags('app-admin-entry', null, 'app.admin') }}
+            'sylius_admin.base#javascripts':
+                app_javascripts:
+                    template: 'admin/javascripts.html.twig' # {{ encore_entry_script_tags('app-admin-entry', null, 'app.admin') }}
+    ```
+
+    Then rebuild your assets:
+
+    ```shell
+    yarn build
+    ```
+
 [ico-version]: https://poser.pugx.org/setono/sylius-plugin-skeleton/v/stable
 [ico-license]: https://poser.pugx.org/setono/sylius-plugin-skeleton/license
 [ico-github-actions]: https://github.com/Setono/SyliusPluginSkeleton/workflows/build/badge.svg

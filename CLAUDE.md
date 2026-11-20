@@ -53,9 +53,10 @@ This is a Symfony bundle structured as a Sylius 2 plugin, with `config/`, `templ
 - `config/routes.yaml` / `config/routes_no_locale.yaml` — Route loaders, delegating to `config/routes/` (admin/shop contexts)
 - `templates/` — Twig templates
 - `translations/` — Translation files
+- `assets/admin/` — Admin JavaScript and styles, starting from `entrypoint.js`, plus `controllers.json` (see Admin JavaScript under [Sylius](#sylius))
 - `tests/Unit/` — Unit tests (e.g. `tests/Unit/DependencyInjection/` for the DI extension)
 - `tests/Functional/` — Functional tests that boot the test application
-- `tests/Application/` — Full Symfony/Sylius app used for functional testing (Kernel, config, database)
+- `tests/Application/` — Full Symfony/Sylius app used for functional testing (Kernel, config, database). Its `webpack.config.js` builds the plugin's admin entry
 - `.symfony-lsp.json` — Points `symfony lsp:check` at the repository root and names the test application's kernel
 
 ## Workflow
@@ -146,6 +147,13 @@ Install these the first time a task needs them, then update this file: move the 
   - Admin menu entries come from a listener on `sylius.menu.admin.main`.
   - Template directories and file names are snake_case.
   - The shop UI uses Bootstrap 5, `ux_icon('tabler:…')` icons and plain JavaScript in `public/`, with no build step.
+- **Admin JavaScript:**
+  - It lives in `assets/admin/` and starts from `assets/admin/entrypoint.js`. Applications import that file into their own admin entry (see the README's installation steps), and the test application builds it as `plugin-admin-entry` in its `app.admin` build. Keep the file and the README step while the entrypoint is empty, so JavaScript added later reaches applications on their next asset build.
+  - The entrypoint can't reach the application's Stimulus app. The skeleton's approach registers the plugin's own controllers on a Stimulus application the entrypoint starts itself, as Sylius' StripePlugin does: `Application.start().register('acme-sylius-example--color-picker', ColorPickerController)`. Applications need nothing beyond the import. In exchange, these controllers can't be lazy, and they can't use outlets to controllers in the application's Stimulus app. Prefix identifiers with the plugin's alias in kebab-case, so they don't clash with the application's or another plugin's.
+  - The alternative, which Sylius' CmsPlugin uses, publishes `assets/admin/` as an npm package: its `package.json` declares the controllers under `symfony.controllers`, and `assets/admin/controllers.json` lists them. They then join the application's Stimulus app and can be lazy. It costs each application a `package.json` dependency on the plugin's `assets/admin/` and an entry in its own `controllers.json`, and the test application needs the dependency too (`file:../../assets/admin`).
+  - Never call `startStimulusApp()` in the entrypoint. It registers every controller in the application's `controllers.json` a second time, so each of them connects twice.
+  - `assets/admin/controllers.json` lists controllers from npm packages that declare `symfony.controllers`: Symfony UX packages, or the plugin's own package in the alternative above. The test application merges it with Sylius' own `controllers.json` into the Stimulus app that `app-admin-entry` starts. Applications don't read it, so give each entry a README installation step that adds it to the application's own `assets/admin/controllers.json`.
+  - npm packages that the entrypoint imports resolve from the application's `node_modules`. When the plugin needs one that Sylius doesn't install, add it to `tests/Application/package.json` and to the README's installation steps.
 - **Extending core entities:** ship an interface plus a trait (the trait carries `#[ORM\…]` attributes) and document in the README how to add them to the application's entity.
 
 ## Doctrine
@@ -160,7 +168,7 @@ Install these the first time a task needs them, then update this file: move the 
   - Unit tests by default. Add functional tests when behaviour can only be seen with the kernel or the database. When a change has both surfaces (a service and an admin page), cover both.
   - Test both the happy path and the edge cases.
   - Assert values and outcomes, not just that methods were called, so mutation testing can kill mutants.
-- **Layout:** `tests/Unit/` mirrors `src/` and never boots the kernel or touches the database. `tests/Functional/` boots `tests/Application` and runs against MySQL, with fixtures loaded in CI.
+- **Layout:** `tests/Unit/` mirrors `src/` and never boots the kernel or touches the database. `tests/Functional/` boots `tests/Application` and runs against MySQL, with fixtures loaded in CI. Admin and shop pages also need the built assets (`yarn build`), because their layouts read each build's `entrypoints.json`.
 - **Conventions:**
   - Mark tests with the `#[Test]` attribute and name them in snake_case BDD style: `it_does_something` or `it_should_do_something_when_condition_is_met`.
   - Use `self::assert…()`. Data providers are `public static`.
@@ -169,6 +177,7 @@ Install these the first time a task needs them, then update this file: move the 
   - DI extension: `Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase`.
   - Configuration: `Matthias\SymfonyConfigTest\PhpUnit\ConfigurationTestCaseTrait`.
   - Kernel and web tests: call `restore_exception_handler()` in `tearDown()`.
+  - Server-side assertions on admin pages that need no JavaScript (status codes, the rendered HTML): extend `WebTestCase` and log in with `$client->loginUser($administrator, 'admin')`, using the fixtures' administrator `sylius@example.com` (see `tests/Functional/AdminAssetsTest.php`). UI behaviour still needs a browser test (see UI verification below).
   - Constraint validators: `ConstraintValidatorTestCase`.
 - **Console commands:** follow https://symfony.com/doc/current/console.html#testing-commands.
   - **Functional tests:** extend `KernelTestCase` and create `new Application(self::$kernel)`, using the FrameworkBundle `Application`. Get the command with `$application->find('<command name>')` and run it with `CommandTester::execute()`.
