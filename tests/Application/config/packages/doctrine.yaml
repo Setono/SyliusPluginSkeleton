@@ -13,7 +13,8 @@ doctrine:
 
         url: '%env(resolve:DATABASE_URL)%'
 
-        # use_savepoints is set in doctrine_savepoints.php, because only DBAL 3 accepts it
+        # use_savepoints is set in doctrine_savepoints.php. Sylius 2.3 allows DBAL 3, which needs the key for savepoints,
+        # and DBAL 4, where DoctrineBundle 3 rejects it, so the PHP file sets it only on DBAL 3
 
 when@prod:
     doctrine:
