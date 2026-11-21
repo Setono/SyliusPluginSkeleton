@@ -7,7 +7,7 @@
         "text": "php://stderr",
         "github": true,
         "stryker": {
-            "badge": "2.2.x"
+            "badge": "2.3.x"
         }
     },
     // The mutation-tests job has no database, assets or browsers, so the initial run is limited to the unit suite.

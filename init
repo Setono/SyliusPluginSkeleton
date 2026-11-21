@@ -134,10 +134,10 @@ use Symfony\Component\Process\Process;
             'Setono Sylius Plugin Skeleton' => $vendor . ' ' . $pluginNameWithSuffix,
             'Setono/SyliusPluginSkeleton' => $githubRepo,
             'setono/sylius-plugin-skeleton' => $composerName,
-            '2.2.x' => $branch,
+            '2.3.x' => $branch,
         ]);
 
-        replaceInFile('infection.json5', ['2.2.x' => $branch]);
+        replaceInFile('infection.json5', ['2.3.x' => $branch]);
 
         $io->text('Renaming classes and config files…');
         rename('src/DependencyInjection/AcmeSyliusExampleExtension.php', sprintf('src/DependencyInjection/%s%sExtension.php', $vendor, $pluginName));
